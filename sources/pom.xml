@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>cz.cuni.mff.xrg.odcs</groupId>
+		<artifactId>module-core</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<artifactId>fusion-tool-dpu</artifactId>
+	<version>0.1.0</version>
+	<packaging>bundle</packaging>
+	<description>Data fusion tool ODCS-FusionTool implemented as ODCleanStore DPU.</description>
+
+	<properties>
+		<dpu.description>Data fusion tool ODCS-FusionTool implemented as
+			ODCleanStore DPU.</dpu.description>
+		<dpu.package>cz.cuni.mff.xrg.odcs.dpu.fusiontool</dpu.package>
+		<dpu.mainClass>FusionToolDpu</dpu.mainClass>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<odcs-cr-version>1.1-SNAPSHOT</odcs-cr-version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>odcleanstore-1</id>
+			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>odcleanstore-thirdpary</id>
+			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>cz.cuni.mff.odcleanstore</groupId>
+			<artifactId>odcs-conflictresolution</artifactId>
+			<version>${odcs-cr-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>cz.cuni.mff.odcleanstore</groupId>
+			<artifactId>odcs-core</artifactId>
+			<version>${odcs-cr-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+			<artifactId>simple-xml</artifactId>
+			<version>2.7</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>1.2.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Embed-Dependency>simple-xml|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
