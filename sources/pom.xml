@@ -60,6 +60,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+					    <Export-Package>${dpu.package}*;version="${project.version}"</Export-Package>
 						<Embed-Dependency>simple-xml|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
