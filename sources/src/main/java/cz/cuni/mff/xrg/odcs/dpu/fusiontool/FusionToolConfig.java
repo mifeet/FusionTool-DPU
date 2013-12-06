@@ -1,6 +1,8 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 
 import cz.cuni.mff.xrg.odcs.commons.module.config.DPUConfigObjectBase;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigReader;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.InvalidInputException;
 
 /**
  * Put your DPU's configuration here.
@@ -33,7 +35,12 @@ public class FusionToolConfig extends DPUConfigObjectBase {
 
     @Override
     public boolean isValid() {
-        return super.isValid();
+        try {
+            ConfigReader.parseConfigXml(this.xmlConfig);
+        } catch (InvalidInputException e) {
+            return false;
+        }
+        return true;
     }
 
 }

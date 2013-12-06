@@ -9,6 +9,8 @@ import com.vaadin.ui.TextArea;
 
 import cz.cuni.mff.xrg.odcs.commons.configuration.ConfigException;
 import cz.cuni.mff.xrg.odcs.commons.module.dialog.BaseConfigDialog;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigReader;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.InvalidInputException;
 
 /**
  * DPU's configuration dialog. User can use this dialog to configure DPU
@@ -44,8 +46,7 @@ public class FusionToolDialog extends
     @Override
     public FusionToolConfig getConfiguration() throws ConfigException {
         if (!configTextArea.isValid()) {
-            InvalidValueException ex = new EmptyValueException("Configuratoin must be filled");
-            throw new ConfigException(ex.getMessage(), ex);
+            throw new ConfigException("Invalid configuration");
         } else {
             FusionToolConfig conf = new FusionToolConfig(configTextArea.getValue().trim());
             return conf;
@@ -108,8 +109,10 @@ public class FusionToolDialog extends
 
             @Override
             public void validate(Object value) throws InvalidValueException {
-                if (value.toString().trim().isEmpty()) {
-                    throw new EmptyValueException("Config must be filled");
+                try {
+                    ConfigReader.parseConfigXml(value.toString());
+                } catch (InvalidInputException e) {
+                    throw new InvalidValueException("Invalid XML configuration");
                 }
             }
         });
