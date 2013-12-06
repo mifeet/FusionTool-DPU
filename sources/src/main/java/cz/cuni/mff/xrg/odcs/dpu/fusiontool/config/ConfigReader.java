@@ -49,7 +49,10 @@ public final class ConfigReader {
 
     private ConfigContainer parseConfigXmlImpl(String configString) throws InvalidInputException {
         ConfigContainerImpl config = new ConfigContainerImpl();
-
+        if (ODCSUtils.isNullOrEmpty(configString.trim())) {
+            return config;
+        }
+        
         Serializer serializer = new Persister();
         ConfigXml configXml;
         try {

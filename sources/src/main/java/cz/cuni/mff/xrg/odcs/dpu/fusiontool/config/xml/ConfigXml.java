@@ -25,6 +25,9 @@ public class ConfigXml {
 
     @Element(name = "ConflictResolution", required = false)
     private ConflictResolutionXml conflictResolution;
+    
+    @Element(name = "Output", required =false)
+    private OutputXml output;
 
     public List<PrefixXml> getPrefixes() {
         return prefixes;
@@ -36,5 +39,9 @@ public class ConfigXml {
 
     public ConflictResolutionXml getConflictResolution() {
         return conflictResolution;
+    }
+    
+    public OutputXml getOutput() {
+        return output;
     }
 }
