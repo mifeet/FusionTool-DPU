@@ -1,6 +1,5 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool.config;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +20,8 @@ public class ConfigContainerImpl implements ConfigContainer {
     private ResolutionStrategy defaultResolutionStrategy = new ResolutionStrategyImpl();
     private Map<URI, ResolutionStrategy> propertyResolutionStrategies = new HashMap<URI, ResolutionStrategy>();
 
-    private File canonicalURIsOutputFile = null;
-    private File canonicalURIsInputFile;
     private boolean enableFileCache = false;
+    private boolean isProfilingOn = false;
 
     @Override
     public String getSeedResourceSparqlQuery() {
@@ -89,31 +87,10 @@ public class ConfigContainerImpl implements ConfigContainer {
     public void setPropertyResolutionStrategies(Map<URI, ResolutionStrategy> strategies) {
         this.propertyResolutionStrategies = strategies;
     }
-
+    
     @Override
-    public File getCanonicalURIsOutputFile() {
-        return canonicalURIsOutputFile;
-    }
-
-    /**
-     * Sets file where resolved canonical URIs shall be written.
-     * @param file file to write canonical URIs to
-     */
-    public void setCanonicalURIsOutputFile(File file) {
-        this.canonicalURIsOutputFile = file;
-    }
-
-    @Override
-    public File getCanonicalURIsInputFile() {
-        return canonicalURIsInputFile;
-    }
-
-    /**
-     * Sets file with list of preferred canonical URIs.
-     * @param file file with canonical URIs
-     */
-    public void setCanonicalURIsInputFile(File file) {
-        this.canonicalURIsInputFile = file;
+    public String getCanonicalURIsFileName() {
+        return ConfigConstants.CANONICAL_URIS_FILE_NAME;
     }
 
     @Override
@@ -127,11 +104,6 @@ public class ConfigContainerImpl implements ConfigContainer {
      */
     public void setEnableFileCache(boolean enableFileCache) {
         this.enableFileCache = enableFileCache;
-    }
-
-    @Override
-    public Integer getQueryTimeout() {
-        return ConfigConstants.DEFAULT_QUERY_TIMEOUT;
     }
 
     @Override
@@ -158,4 +130,18 @@ public class ConfigContainerImpl implements ConfigContainer {
     public Collection<String> getPreferredCanonicalURIs() {
         return ConfigConstants.DEFAULT_PREFERRED_CANONICAL_URIS;
     }
+    
+    @Override
+    public boolean isProfilingOn() {
+        return isProfilingOn; 
+    }
+    
+    /**
+     * Sets value for {@link #isProfilingOn()}.
+     * @param isProfilingOn see {@link #isProfilingOn()}
+     */
+    public void setProfilingOn(boolean isProfilingOn) {
+        this.isProfilingOn = isProfilingOn;
+    }
+    
 }

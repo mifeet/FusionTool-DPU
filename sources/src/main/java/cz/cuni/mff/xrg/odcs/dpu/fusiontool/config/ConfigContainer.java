@@ -1,6 +1,5 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool.config;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 
@@ -38,12 +37,6 @@ public interface ConfigContainer {
      * @return map of resolution strategies indexed by property URIs 
      */
     Map<URI, ResolutionStrategy> getPropertyResolutionStrategies();
-    
-    /**
-     * Database queries timeout.
-     * @return query timeout; zero means no timeout
-     */
-    Integer getQueryTimeout();
 
     /**
      * Coefficient used in quality computation formula. Value N means that (N+1)
@@ -72,18 +65,11 @@ public interface ConfigContainer {
     Long getMaxDateDifference();
     
     /**
-     * File where resolved canonical URIs shall be written. 
+     * Name of file where resolved canonical URIs are read from and written to. 
      * Null means that canonical URIs will not be written anywhere.
-     * @return file to write canonical URIs to or null
+     * @return name of file with canonical URIs or null
      */
-    File getCanonicalURIsOutputFile();
-    
-    /**
-     * File with list of preferred canonical URIs, one URI per line. 
-     * Null means no preferred URIs.
-     * @return file with canonical URIs
-     */
-    File getCanonicalURIsInputFile();
+    String getCanonicalURIsFileName();
     
     /**
      * Indicates whether disable (true) or enable (false) file cache for objects that needed by CR algorithm
@@ -94,9 +80,10 @@ public interface ConfigContainer {
     
     /**
      * SPARQL query returning URI resources which are initially loaded and processed.
+     * The query must be a SELECT query binding a single variable in the result set.
      * If given, triples having matching resources and triples reachable from them are processed. All data
      * from matching input graphs are processed otherwise.
-     * @return SPARQL restriction (group graph pattern) or null  
+     * @return SPARQL query or null  
      */
     String getSeedResourceSparqlQuery();
     
@@ -106,4 +93,10 @@ public interface ConfigContainer {
      * @return set of preferred canonical URIs
      */
     Collection<String> getPreferredCanonicalURIs();
+    
+    /**
+     * Returns true of profiling logs should be printed.
+     * @return true iff profiling logs should be printed
+     */
+    boolean isProfilingOn();
 }

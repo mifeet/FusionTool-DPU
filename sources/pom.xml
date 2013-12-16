@@ -49,6 +49,11 @@
 			<artifactId>simple-xml</artifactId>
 			<version>2.7</version>
 		</dependency>
+		<dependency>
+			<groupId>org.mapdb</groupId>
+			<artifactId>mapdb</artifactId>
+			<version>0.9.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -61,7 +66,7 @@
 				<configuration>
 					<instructions>
 					    <Export-Package>${dpu.package}*;version="${project.version}"</Export-Package>
-						<Embed-Dependency>simple-xml|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
+						<Embed-Dependency>simple-xml|mapdb|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>

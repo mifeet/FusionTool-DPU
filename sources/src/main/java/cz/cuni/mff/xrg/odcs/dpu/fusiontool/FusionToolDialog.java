@@ -1,8 +1,6 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 
 import com.vaadin.data.Property;
-import com.vaadin.data.Validator.EmptyValueException;
-import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -124,8 +122,10 @@ public class FusionToolDialog extends
         configTextArea.setInputPrompt("<?xml version=\"1.0\"?>\n<config>\n</config>");
 
         mainLayout.addComponent(configTextArea, 1, 0);
+        // CHECKSTYLE:OFF
         mainLayout.setColumnExpandRatio(0, 0.00001f);
         mainLayout.setColumnExpandRatio(1, 0.99999f);
+        // CHECKSTYLE:ON
 
         return mainLayout;
     }

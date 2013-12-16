@@ -3,7 +3,6 @@
  */
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool.config;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -140,19 +139,6 @@ public final class ConfigReader {
         for (ParamXml param : params) {
             if (param.getValue() == null) {
                 continue;
-            }
-            if ("canonicalUriOutputFile".equalsIgnoreCase(param.getName())) {
-                if (!ODCSUtils.isNullOrEmpty(param.getValue())) {
-                    config.setCanonicalURIsOutputFile(new File(param.getValue()));
-                } else {
-                    config.setCanonicalURIsOutputFile(null);
-                }
-            } else if ("canonicalUriInputFile".equalsIgnoreCase(param.getName())) {
-                if (!ODCSUtils.isNullOrEmpty(param.getValue())) {
-                    config.setCanonicalURIsInputFile(new File(param.getValue()));
-                } else {
-                    config.setCanonicalURIsInputFile(null);
-                }
             } else if ("enableFileCache".equalsIgnoreCase(param.getName())) {
                 config.setEnableFileCache(Boolean.parseBoolean(param.getValue()));                
             } else {

@@ -25,10 +25,18 @@ public class FusionToolConfig extends DPUConfigObjectBase {
         xmlConfig = "";
     }
 
+    /**
+     * Initializes a new instance with the given XML configuration.
+     * @param xmlConfig XML configuration
+     */
     public FusionToolConfig(String xmlConfig) {
         this.xmlConfig = xmlConfig;
     }
 
+    /**
+     * Returns the XML configuration for DPU.
+     * @return XML configuration
+     */
     public String getXmlConfig() {
         return xmlConfig;
     }

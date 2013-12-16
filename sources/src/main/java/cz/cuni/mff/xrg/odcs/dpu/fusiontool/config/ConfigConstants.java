@@ -25,15 +25,9 @@ public final class ConfigConstants {
     }
     
     /**
-     * Default timeout for database queries in seconds.
-     * Zero means no timeout.
-     */
-    public static final int DEFAULT_QUERY_TIMEOUT = 1200;
-    
-    /**
      * Default prefix of named graphs and URIs where query results and metadata in the output are placed.
      */
-    public static final String DEFAULT_RESULT_DATA_URI_PREFIX = ODCS.NAMESPACE + "CR/";
+    public static final String DEFAULT_RESULT_DATA_URI_PREFIX = ODCS.NAMESPACE + "fusiontool/";
     
     /**
      * Coefficient used in quality computation formula. Value N means that (N+1)
@@ -59,6 +53,11 @@ public final class ConfigConstants {
     public static final long MAX_DATE_DIFFERENCE = 31622400;
     
     /**
+     * Maximum number of values in a generated argument for the "?var IN (...)" SPARQL construct .
+     */
+    public static final int MAX_QUERY_LIST_LENGTH = 25;
+    
+    /**
      * Set of default preferred canonical URIs. 
      */
     public static final Collection<String> DEFAULT_PREFERRED_CANONICAL_URIS = Arrays.asList(
@@ -74,5 +73,10 @@ public final class ConfigConstants {
             DC.CREATOR.stringValue(),
             DC.SOURCE.stringValue(),
             DC.SUBJECT.stringValue());
+
+    /**
+     * Name of file with canonical URIs.
+     */
+    public static final String CANONICAL_URIS_FILE_NAME = "canonicalURIs.txt";
             
 }

@@ -1,18 +1,16 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
 
+import org.simpleframework.xml.core.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cuni.mff.odcleanstore.conflictresolution.ConflictResolver;
-import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
-import cz.cuni.mff.odcleanstore.conflictresolution.impl.ConflictResolverImpl;
+import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.xrg.odcs.commons.data.DataUnitException;
 import cz.cuni.mff.xrg.odcs.commons.dpu.DPUContext;
 import cz.cuni.mff.xrg.odcs.commons.dpu.DPUException;
@@ -20,11 +18,12 @@ import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.AsTransformer;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.InputDataUnit;
 import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.OutputDataUnit;
 import cz.cuni.mff.xrg.odcs.commons.module.dpu.ConfigurableBase;
-import cz.cuni.mff.xrg.odcs.commons.module.file.FileManager;
 import cz.cuni.mff.xrg.odcs.commons.web.AbstractConfigDialog;
 import cz.cuni.mff.xrg.odcs.commons.web.ConfigDialogProvider;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigContainer;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigContainerImpl;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigReader;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuException;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.InvalidInputException;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
@@ -50,21 +49,21 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
      * owl:sameAs links to be used during conflict resolution.
      */
     @InputDataUnit(name = "sameAs", optional = true, description = "owl:sameAs links to be used during conflict resolution")
-    public RDFDataUnit sameAs;
+    public RDFDataUnit sameAsInput;
+    
+    /**
+     * Metadata used during conflict resolution.
+     */
+    @InputDataUnit(name = "metadata", optional = true, description = "Metadata used during conflict resolution")
+    public RDFDataUnit metadataInput;
 
     /**
      * Fused output data.
      */
     @OutputDataUnit(name = "output", description = "Fused output data")
     public RDFDataUnit rdfOutput;
-
-    /**
-     * Quality & provenance metadata about the fused output data.
-     */
-    @OutputDataUnit(name = "metadata", description = "Quality & provenance metadata about the fused output data")
-    public RDFDataUnit metadataOutput;
     // CHECKSTYLE:ON
-    
+
     /**
      * Initializes a new instance.
      */
@@ -78,78 +77,68 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     }
 
     @Override
-    public void execute(DPUContext context) throws DPUException,
-            DataUnitException {
-
+    public void execute(DPUContext context) throws DPUException, DataUnitException {
+        // Read config
         ConfigContainer configContainer = null;
         try {
             configContainer = ConfigReader.parseConfigXml(this.config.getXmlConfig());
-//            checkValidInput(config);
-//            setupDefaultRestrictions(config);
+            checkValidInput(configContainer);
         } catch (InvalidInputException e) {
-//            System.err.println("Error in config file:");
-//            System.err.println("  " + e.getMessage());
-//            if (e.getCause() instanceof PersistenceException) {
-//                System.err.println("  " + e.getCause().getMessage());
-//            }
-//            e.printStackTrace();
-            return;
-        }
-
-//        long startTime = System.currentTimeMillis();
-//        //System.out.println("Starting conflict resolution, this may take a while... \n");
-//
-//        try {
-//            ODCSFusionToolExecutor odcsFusionToolExecutor = new ODCSFusionToolExecutor();
-//            odcsFusionToolExecutor.runFusionTool(config);
-//        } catch (ODCSFusionToolException e) {
-//            System.err.println("Error:");
-//            System.err.println("  " + e.getMessage());
-//            if (e.getCause() != null) {
-//                System.err.println("  " + e.getCause().getMessage());
-//            }
-//            return;
-//        } catch (ConflictResolutionException e) {
-//            System.err.println("Conflict resolution error:");
-//            System.err.println("  " + e.getMessage());
-//            return;
-//        } catch (IOException e) {
-//            System.err.println("Error when writing results:");
-//            System.err.println("  " + e.getMessage());
-//            return;
-//        }
-//
-//        System.out.println("----------------------------");
-//
-//        long runTime = System.currentTimeMillis() - startTime;
-//        final long hourMs = ODCSUtils.MILLISECONDS * ODCSUtils.TIME_UNIT_60 * ODCSUtils.TIME_UNIT_60;
-//        DateFormat timeFormat = new SimpleDateFormat("mm:ss.SSS");
-//        timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-//        System.out.printf("ODCS-FusionTool executed in %d:%s \n",
-//                runTime / hourMs,
-//                timeFormat.format(new Date(runTime)));
-
-        FileManager fileManager = new FileManager(context);
-        File testFile = fileManager.getGlobal().file("test-dpu.txt");
-        PrintWriter writer;
-        try {
-            writer = new PrintWriter(new FileWriter(testFile));
-            writer.write("Current time: " + (new Date()).toString() + "\n");
-            writer.write("Config: " + configContainer.getEnableFileCache() + "\n");
-
-            ConflictResolver resolver = new ConflictResolverImpl();
-            Collection<ResolvedStatement> resolvedTriples;
-            try {
-                resolvedTriples = resolver.resolveConflicts(rdfInput.getTriples());
-            } catch (Exception e) {
-                e.printStackTrace(writer);
-                LOG.error("ERROR", e);
-            } finally {
-                writer.close();
+            LOG.error("Error in XML configuration:\n  {}", e.getMessage());
+            if (e.getCause() instanceof PersistenceException) {
+                LOG.error("  " + e.getCause().getMessage());
             }
-        } catch (IOException e) {
-            throw new DPUException(e);
+            throw new DPUException("Error in XML configuration", e);
         }
+        
+        ((ConfigContainerImpl) configContainer).setProfilingOn(context.isDebugging());
+        
+        // Start time measurement
+        long startTime = System.currentTimeMillis();
+        LOG.info("Starting data fusion, this may take a while...");
+        try {
+            // Execute data fusion
+            FusionToolDpuExecutor executor = new FusionToolDpuExecutor(
+                    configContainer, 
+                    context, 
+                    rdfInput,
+                    sameAsInput,
+                    metadataInput, 
+                    rdfOutput);
+            executor.runFusionTool();
+        } catch (FusionToolDpuException e) {
+            LOG.error(e.getMessage());
+            if (e.getCause() != null) {
+                LOG.error("  " + e.getCause().getMessage());
+            }
+            throw e;
+        }
+
+        LOG.info("Fusion Tool DPU executed in {}", formatRunTime(System.currentTimeMillis() - startTime));
     }
 
+    private static void checkValidInput(ConfigContainer config) throws InvalidInputException {
+        if (!ODCSUtils.isValidIRI(config.getResultDataURIPrefix())) {
+            throw new InvalidInputException("Result data URI prefix must be a valid URI, '" + config.getResultDataURIPrefix()
+                    + "' given");
+        }
+        for (Map.Entry<String, String> prefixEntry : config.getPrefixes().entrySet()) {
+            if (!prefixEntry.getKey().isEmpty() && !ODCSUtils.isValidNamespacePrefix(prefixEntry.getKey())) {
+                throw new InvalidInputException("Invalid namespace prefix '" + prefixEntry.getKey() + "'");
+            }
+            if (!prefixEntry.getValue().isEmpty() && !ODCSUtils.isValidIRI(prefixEntry.getValue())) {
+                throw new InvalidInputException("Invalid namespace prefix definition for URI '" + prefixEntry.getValue() + "'");
+            }
+        }
+        // intentionally do not check canonical URI files
+    }
+    
+    private static String formatRunTime(long runTime) {
+        final long hourMs = ODCSUtils.MILLISECONDS * ODCSUtils.TIME_UNIT_60 * ODCSUtils.TIME_UNIT_60;
+        DateFormat timeFormat = new SimpleDateFormat("mm:ss.SSS");
+        timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return String.format("%d:%s",
+                runTime / hourMs,
+                timeFormat.format(new Date(runTime)));
+    }
 }
