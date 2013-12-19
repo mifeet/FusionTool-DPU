@@ -116,7 +116,7 @@ public class FusionToolDpuExecutor {
             PrefixDeclBuilder nsPrefixes = new PrefixDeclBuilderImpl(config.getPrefixes());
             QuadLoader quadLoader = new QuadLoader(rdfInput, alternativeURINavigator, nsPrefixes);
             timeProfiler.stopAddCounter(EnumProfilingCounters.INITIALIZATION);
-            while (queuedSubjects.hasNext()) {
+            while (queuedSubjects.hasNext() && !executionContext.canceled()) {
                 timeProfiler.startCounter(EnumProfilingCounters.BUFFERING);
                 String uri = queuedSubjects.next();
                 String canonicalURI = uriMapping.getCanonicalURI(uri);
@@ -156,6 +156,9 @@ public class FusionToolDpuExecutor {
 
                 memoryProfiler.capture();
             }
+            if (executionContext.canceled()) {
+                LOG.warn("FusionToolDpu execution has been stopped before it finished!");
+            }
             LOG.info(String.format("Processed %,d quads which were resolved to %,d output quads.", inputTriples, outputTriples));
 
             // writeCanonicalURIs(resolvedCanonicalURIs, config.getCanonicalURIsOutputFile()); // TODO
@@ -190,7 +193,8 @@ public class FusionToolDpuExecutor {
                 return new MapdbCollectionFactory(executionContext.getWorkingDir());
             } catch (IOException e) {
                 throw new FusionToolDpuException(
-                        FusionToolDpuErrorCodes.COLLECTION_BUFFER_CREATION_ERROR, "Cannot initialize buffer on the filesystem.");
+                        FusionToolDpuErrorCodes.COLLECTION_BUFFER_CREATION_ERROR,
+                        "Cannot initialize buffer on the filesystem.", e);
             }
         } else {
             return new MemoryCollectionFactory();
@@ -212,11 +216,11 @@ public class FusionToolDpuExecutor {
         Graph sameAsTriples;
         try {
             sameAsTriples = sameAsInput.executeConstructQuery(
-                    String.format("SELECT {?s <%1$s> ?o} WHERE {?s <%1$s> ?o}", OWL.SAMEAS));
+                    String.format("CONSTRUCT {?s <%1$s> ?o} WHERE {?s <%1$s> ?o}", OWL.SAMEAS));
             uriMapping.addLinks(sameAsTriples.iterator());
         } catch (InvalidQueryException e) {
             throw new FusionToolDpuException(
-                    FusionToolDpuErrorCodes.SAME_AS_LOADING_ERROR, "Error when loading owl:sameAs links from input");
+                    FusionToolDpuErrorCodes.SAME_AS_LOADING_ERROR, "Error when loading owl:sameAs links from input", e);
         }
         
         return uriMapping;
@@ -253,7 +257,7 @@ public class FusionToolDpuExecutor {
         UriQueueImpl seedSubjects = new UriQueueImpl(collectionFactory);
         String query = (config.getSeedResourceSparqlQuery() != null) 
                 ? config.getSeedResourceSparqlQuery()
-                : "SELECT ?s WHERE {?s ?p ?o}";
+                : "SELECT DISTINCT ?s WHERE {?s ?p ?o}";
         
                 MyTupleQueryResult queryResult = null;
         try {
@@ -274,10 +278,10 @@ public class FusionToolDpuExecutor {
             }
         } catch (InvalidQueryException e) {
             throw new FusionToolDpuException(
-                    FusionToolDpuErrorCodes.INVALID_SEED_RESOURCE_QUERY, "Invalid seed resource SPARQL query");
+                    FusionToolDpuErrorCodes.INVALID_SEED_RESOURCE_QUERY, "Invalid seed resource SPARQL query", e);
         } catch (Exception e) {
             throw new FusionToolDpuException(
-                    FusionToolDpuErrorCodes.SEED_SUBJECTS_LOADING_ERROR, "Error when loading initial subjects");
+                    FusionToolDpuErrorCodes.SEED_SUBJECTS_LOADING_ERROR, "Error when loading initial subjects", e);
         } finally {
             if (queryResult != null) {
                 try {
