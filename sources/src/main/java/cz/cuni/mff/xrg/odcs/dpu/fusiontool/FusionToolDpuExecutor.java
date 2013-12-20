@@ -308,7 +308,7 @@ public class FusionToolDpuExecutor {
     protected ConflictResolver createConflictResolver(URIMappingIterable uriMapping) {
         final int chunkSize = 1000;
         Model metadata = new TreeModel();
-        LazyTriples metadataTriples = metadataInput.getLazyTriples(chunkSize);
+        LazyTriples metadataTriples = metadataInput.getTriplesIterator(chunkSize);
         while (metadataTriples.hasNextTriples()) {
             metadata.addAll(metadataTriples.getTriples());
         }

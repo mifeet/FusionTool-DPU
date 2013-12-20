@@ -48,11 +48,9 @@ public class QuadLoader {
      * (2) searched uri
      */
     private static final String QUADS_QUERY_SIMPLE = "%1$s" // TODO: distinct?
-            + "\n SELECT DISTINCT ?g (<%2$s> AS ?s) ?p ?o"
-            + "\n WHERE {"
-            + "\n   GRAPH ?g {"
-            + "\n     <%2$s> ?p ?o"
-            + "\n   }"
+            + "\n SELECT DISTINCT (<%2$s> AS ?s) ?p ?o"
+            + "\n WHERE { " 
+            + "\n   <%2$s> ?p ?o "
             + "\n }";
 
     /**
@@ -65,18 +63,15 @@ public class QuadLoader {
      * (2) list of searched URIs (e.g. "<uri1>,<uri2>,<uri3>")
      */
     private static final String QUADS_QUERY_ALTERNATIVE = "%1$s"
-            + "\n SELECT DISTINCT ?g ?s ?p ?o"
+            + "\n SELECT DISTINCT ?s ?p ?o"
             + "\n WHERE {"
-            + "\n   GRAPH ?g {"
-            + "\n     ?s ?p ?o"
-            + "\n     FILTER (?s IN (%2$s))" // TODO: replace by a large union for efficiency?
-            + "\n   }"
+            + "\n   ?s ?p ?o"
+            + "\n   FILTER (?s IN (%2$s))" // TODO: replace by a large union for efficiency?
             + "\n }";
 
     private static final String SUBJECT_VAR = "s";
     private static final String PROPERTY_VAR = "p";
     private static final String OBJECT_VAR = "o";
-    private static final String GRAPH_VAR = "g";
 
     private final AlternativeURINavigator alternativeURINavigator;
     private final RDFDataUnit rdfData;
@@ -130,7 +125,8 @@ public class QuadLoader {
         }
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Loaded quads for URI {} in {} ms", new Object[] { uri, System.currentTimeMillis() - startTime });
+            LOG.trace("Loaded {} quads for URI {} in {} ms", 
+                    new Object[] { result.size(), uri, System.currentTimeMillis() - startTime });
         }
 
         return result;
@@ -149,14 +145,14 @@ public class QuadLoader {
         MyTupleQueryResult queryResult = null;
         try {
             queryResult = rdfData.executeSelectQueryAsTuples(sparqlQuery);
-
             while (queryResult.hasNext()) {
+                
                 BindingSet bindings = queryResult.next();
                 Statement quad = VALUE_FACTORY.createStatement(
                         (Resource) bindings.getValue(SUBJECT_VAR),
                         (URI) bindings.getValue(PROPERTY_VAR),
                         bindings.getValue(OBJECT_VAR),
-                        (Resource) bindings.getValue(GRAPH_VAR));
+                        rdfData.getDataGraph());
                 quads.add(quad);
             }
         } finally {
