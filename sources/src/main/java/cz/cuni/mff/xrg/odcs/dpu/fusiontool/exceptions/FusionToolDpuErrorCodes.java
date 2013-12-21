@@ -19,5 +19,7 @@ public final class FusionToolDpuErrorCodes {
     public static final int SEED_SUBJECTS_LOADING_ERROR = 4;
     public static final int QUERY_QUADS = 5;
     public static final int CONFLICT_RESOLUTION = 6;
+    public static final int READ_CANONICAL_URI_FILE = 7;
+    public static final int WRITE_CANONICAL_URI_FILE = 8;
     
 }

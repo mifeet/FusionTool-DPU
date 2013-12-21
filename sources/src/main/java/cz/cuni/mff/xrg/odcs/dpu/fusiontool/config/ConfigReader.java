@@ -25,6 +25,7 @@ import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.PropertyResolutionStrategy
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.PropertyXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.ResolutionStrategyXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.InvalidInputException;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.FileNameSanitizer;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.util.NamespacePrefixExpander;
 
 /**
@@ -140,7 +141,20 @@ public final class ConfigReader {
             if (param.getValue() == null) {
                 continue;
             } else if ("enableFileCache".equalsIgnoreCase(param.getName())) {
-                config.setEnableFileCache(Boolean.parseBoolean(param.getValue()));                
+                config.setEnableFileCache(Boolean.parseBoolean(param.getValue()));
+            } else if ("canonicalUrisFile".equalsIgnoreCase(param.getName())) {
+                String fileName = param.getValue();
+                if (ODCSUtils.isNullOrEmpty(fileName)) {
+                    continue;
+                } else if (FileNameSanitizer.containsPath(fileName)) {
+                    throw new InvalidInputException("Parameter " + param.getName()
+                            + " must be a simple file name and cannot contain path");
+                } else if (!FileNameSanitizer.isFileNameValid(fileName)) {
+                    throw new InvalidInputException("Parameter " + param.getName()
+                            + " contains illegal characters for a file name");
+                } else {
+                    config.setCanonicalURIsFileName(fileName);
+                }
             } else {
                 throw new InvalidInputException("Unknown parameter " + param.getName()
                         + " used in conflict resolution parameters");

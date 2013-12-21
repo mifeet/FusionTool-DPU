@@ -47,24 +47,6 @@ public interface ConfigContainer {
     Double getAgreeCoeficient();
 
     /**
-     * Graph score used if none is given in the input.
-     * @return default score
-     */
-    Double getScoreIfUnknown();
-
-    /**
-     * Weight of the publisher score.
-     * @return publisher score weight
-     */
-    Double getPublisherScoreWeight();
-
-    /**
-     * Difference between two dates when their distance is equal to MAX_DISTANCE in seconds.
-     * @return time interval in seconds
-     */
-    Long getMaxDateDifference();
-    
-    /**
      * Name of file where resolved canonical URIs are read from and written to. 
      * Null means that canonical URIs will not be written anywhere.
      * @return name of file with canonical URIs or null

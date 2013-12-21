@@ -47,7 +47,7 @@ public class QuadLoader {
      * (1) namespace prefixes declaration
      * (2) searched uri
      */
-    private static final String QUADS_QUERY_SIMPLE = "%1$s" // TODO: distinct?
+    private static final String QUADS_QUERY_SIMPLE = "%1$s" 
             + "\n SELECT DISTINCT (<%2$s> AS ?s) ?p ?o"
             + "\n WHERE { " 
             + "\n   <%2$s> ?p ?o "

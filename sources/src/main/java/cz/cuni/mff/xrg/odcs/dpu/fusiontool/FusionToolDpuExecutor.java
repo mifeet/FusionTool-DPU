@@ -30,6 +30,7 @@ import cz.cuni.mff.xrg.odcs.commons.dpu.DPUContext;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigContainer;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuException;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.CanonicalUriFileReader;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.LargeCollectionFactory;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.MapdbCollectionFactory;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.MemoryCollectionFactory;
@@ -161,7 +162,7 @@ public class FusionToolDpuExecutor {
             }
             LOG.info(String.format("Processed %,d quads which were resolved to %,d output quads.", inputTriples, outputTriples));
 
-            // writeCanonicalURIs(resolvedCanonicalURIs, config.getCanonicalURIsOutputFile()); // TODO
+            writeCanonicalURIs(resolvedCanonicalURIs);
             
             printProfilingInformation(timeProfiler, memoryProfiler);
             
@@ -232,13 +233,26 @@ public class FusionToolDpuExecutor {
      * @param settingsPreferredURIs URIs occurring on fusion tool configuration
      * @param preferredCanonicalURIs default set of preferred canonical URIs
      * @return set of URIs preferred for canonical URIs
+     * @throws FusionToolDpuException I/O error
      */
-    protected Set<String> getPreferredURIs(Set<URI> settingsPreferredURIs, Collection<String> preferredCanonicalURIs) {
+    protected Set<String> getPreferredURIs(Set<URI> settingsPreferredURIs, Collection<String> preferredCanonicalURIs) 
+            throws FusionToolDpuException {
+        
         Set<String> preferredURIs = new HashSet<String>(settingsPreferredURIs.size());
         for (URI uri : settingsPreferredURIs) {
             preferredURIs.add(uri.stringValue());
         }
         preferredURIs.addAll(preferredCanonicalURIs);
+        
+        if (config.getCanonicalURIsFileName() != null) {
+            CanonicalUriFileReader canonicalUriReader = new CanonicalUriFileReader(executionContext.getGlobalDirectory());
+            try {
+                canonicalUriReader.readCanonicalUris(config.getCanonicalURIsFileName(), preferredURIs);
+            } catch (IOException e) {
+                throw new FusionToolDpuException(
+                        FusionToolDpuErrorCodes.READ_CANONICAL_URI_FILE, "Cannot read canonical URIs from file", e);
+            }
+        }
 
         return preferredURIs;
     }
@@ -386,6 +400,23 @@ public class FusionToolDpuExecutor {
         for (ResolvedStatement resolvedStatement : resolvedQuads) {
             Statement statement = resolvedStatement.getStatement();
             rdfOutput.addTriple(statement.getSubject(), statement.getPredicate(), statement.getObject());
+        }
+    }
+    
+    /**
+     * Writes canonical URIs to a file specified in configuration.
+     * @param resolvedCanonicalURIs resolved canonical URIs
+     * @throws FusionToolDpuException I/O error
+     */
+    protected void writeCanonicalURIs(Set<String> resolvedCanonicalURIs) throws FusionToolDpuException {
+        if (config.getCanonicalURIsFileName() != null) {
+            CanonicalUriFileReader canonicalUriReader = new CanonicalUriFileReader(executionContext.getGlobalDirectory());
+            try {
+                canonicalUriReader.writeCanonicalUris(config.getCanonicalURIsFileName(), resolvedCanonicalURIs);
+            } catch (IOException e) {
+                throw new FusionToolDpuException(
+                        FusionToolDpuErrorCodes.WRITE_CANONICAL_URI_FILE, "Cannot write canonical URIs from file", e);
+            }
         }
     }
 }

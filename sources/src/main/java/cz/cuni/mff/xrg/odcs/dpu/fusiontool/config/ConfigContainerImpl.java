@@ -22,6 +22,7 @@ public class ConfigContainerImpl implements ConfigContainer {
 
     private boolean enableFileCache = false;
     private boolean isProfilingOn = false;
+    private String canonicalURIsFileName = null;
 
     @Override
     public String getSeedResourceSparqlQuery() {
@@ -90,7 +91,15 @@ public class ConfigContainerImpl implements ConfigContainer {
     
     @Override
     public String getCanonicalURIsFileName() {
-        return ConfigConstants.CANONICAL_URIS_FILE_NAME;
+        return canonicalURIsFileName;
+    }
+    
+    /**
+     * Setter for value {@link #getCanonicalURIsFileName()}.
+     * @param fileName name of file with canonical URIs
+     */
+    public void setCanonicalURIsFileName(String fileName) {
+        this.canonicalURIsFileName  = fileName;
     }
 
     @Override
@@ -109,21 +118,6 @@ public class ConfigContainerImpl implements ConfigContainer {
     @Override
     public Double getAgreeCoeficient() {
         return ConfigConstants.AGREE_COEFFICIENT;
-    }
-
-    @Override
-    public Double getScoreIfUnknown() {
-        return ConfigConstants.SCORE_IF_UNKNOWN;
-    }
-
-    @Override
-    public Double getPublisherScoreWeight() {
-        return ConfigConstants.PUBLISHER_SCORE_WEIGHT;
-    }
-
-    @Override
-    public Long getMaxDateDifference() {
-        return ConfigConstants.MAX_DATE_DIFFERENCE;
     }
 
     @Override

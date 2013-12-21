@@ -73,10 +73,4 @@ public final class ConfigConstants {
             DC.CREATOR.stringValue(),
             DC.SOURCE.stringValue(),
             DC.SUBJECT.stringValue());
-
-    /**
-     * Name of file with canonical URIs.
-     */
-    public static final String CANONICAL_URIS_FILE_NAME = "canonicalURIs.txt";
-            
 }
