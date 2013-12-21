@@ -1,6 +1,5 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 
-import com.vaadin.data.Property;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
@@ -25,6 +24,8 @@ public class FusionToolDialog extends
     private TextArea configTextArea;
 
     private Label labelUpQuer;
+    
+    private String lastValidationError = "";
 
     /**
      * Initializes a new instance of the class.
@@ -44,7 +45,7 @@ public class FusionToolDialog extends
     @Override
     public FusionToolConfig getConfiguration() throws ConfigException {
         if (!configTextArea.isValid()) {
-            throw new ConfigException("Invalid configuration");
+            throw new ConfigException("Invalid configuration: " + lastValidationError);
         } else {
             FusionToolConfig conf = new FusionToolConfig(configTextArea.getValue().trim());
             return conf;
@@ -90,18 +91,6 @@ public class FusionToolDialog extends
         // SPARQL Update Query textArea
         configTextArea = new TextArea();
 
-        configTextArea
-                .addValueChangeListener(new Property.ValueChangeListener() {
-                    private static final long serialVersionUID = 1L;
-
-                    @Override
-                    public void valueChange(Property.ValueChangeEvent event) {
-                        // final String query = configTextArea.getValue().trim();
-                        // if not valid
-                        // validationErrorMessage = "...";
-                    }
-                });
-
         configTextArea.addValidator(new com.vaadin.data.Validator() {
             private static final long serialVersionUID = 1L;
 
@@ -110,7 +99,9 @@ public class FusionToolDialog extends
                 try {
                     ConfigReader.parseConfigXml(value.toString());
                 } catch (InvalidInputException e) {
-                    throw new InvalidValueException("Invalid XML configuration");
+                    String message = "Invalid XML configuration: " + e.getMessage();
+                    lastValidationError = message;
+                    throw new InvalidValueException(message);
                 }
             }
         });
