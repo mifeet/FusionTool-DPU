@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <DataProcessing>
+    <Param name="enableFileCache" value="false" />
+    <Param name="canonicalUrisFile" value="canonicalUris.txt" />
+    <SeedResourceSparqlQuery>SELECT ?s WHERE { ?s ?p ?o }</SeedResourceSparqlQuery>
+  </DataProcessing>      
+  
+  <ConflictResolution>
+    <DefaultStrategy function="ALL" cardinality="MANYVALUED" aggregationErrorStrategy="RETURN_ALL" />
+    <ResolutionStrategy function="BEST">
+      <Property id="rdfs:label"/>
+    </ResolutionStrategy>
+  </ConflictResolution>
+</Config>

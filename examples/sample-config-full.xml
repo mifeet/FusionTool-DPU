@@ -16,7 +16,7 @@
          the query should return result set with a single bound variable representing the seed resources;
          optional (if not given, all triples from source graphs are processed) -->
     <SeedResourceSparqlQuery>
-      SELECT ?s WHERE { ?s rdf:type &lt;http://purl.org/procurement/public-contracts#Contract&gt; } 
+      SELECT ?s WHERE { ?s ?p ?o } 
     </SeedResourceSparqlQuery>
   </DataProcessing>      
   
