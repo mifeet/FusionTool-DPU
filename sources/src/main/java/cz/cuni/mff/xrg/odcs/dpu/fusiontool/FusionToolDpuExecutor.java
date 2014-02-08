@@ -3,6 +3,9 @@ package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.openrdf.model.Graph;
@@ -13,7 +16,10 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +34,15 @@ import cz.cuni.mff.odcleanstore.conflictresolution.quality.DummySourceQualityCal
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.xrg.odcs.commons.dpu.DPUContext;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.ConfigContainer;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.FileOutput;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuException;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.CanonicalUriFileReader;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.LargeCollectionFactory;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.MapdbCollectionFactory;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.MemoryCollectionFactory;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.file.FileOutputWriter;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.file.FileOutputWriterFactory;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.urimapping.AlternativeURINavigator;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.urimapping.URIMappingIterable;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.urimapping.URIMappingIterableImpl;
@@ -47,7 +56,6 @@ import cz.cuni.mff.xrg.odcs.dpu.fusiontool.util.UriQueue;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.util.UriQueueImpl;
 import cz.cuni.mff.xrg.odcs.rdf.exceptions.InvalidQueryException;
 import cz.cuni.mff.xrg.odcs.rdf.help.LazyTriples;
-import cz.cuni.mff.xrg.odcs.rdf.impl.MyTupleQueryResult;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 /**
@@ -59,12 +67,17 @@ import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 public class FusionToolDpuExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuExecutor.class);
     
+    /** An instance of {@link FileOutputWriterFactory}. */
+    protected static final FileOutputWriterFactory RDF_WRITER_FACTORY = new FileOutputWriterFactory();
+    
     private ConfigContainer config;
     private DPUContext executionContext;
     private RDFDataUnit rdfInput;
     private RDFDataUnit sameAsInput;
     private RDFDataUnit metadataInput;
     private RDFDataUnit rdfOutput;
+    private boolean hasFusionToolRan;
+    private int fileOutputWrittenQuads;
 
     /**
      * Creates a new instance.
@@ -83,6 +96,8 @@ public class FusionToolDpuExecutor {
         this.sameAsInput = sameAsInput;
         this.metadataInput = metadataInput;
         this.rdfOutput = rdfOutput;
+        this.hasFusionToolRan = false;
+        this.fileOutputWrittenQuads = 0;
     }
 
     /**
@@ -90,12 +105,18 @@ public class FusionToolDpuExecutor {
      * @throws FusionToolDpuException error
      */
     public void runFusionTool() throws FusionToolDpuException {
+        if (this.hasFusionToolRan) {
+            throw new IllegalStateException("runFusionTool() can be called only once");
+        }
+        this.hasFusionToolRan = true;
+        
         LargeCollectionFactory collectionFactory = 
                 createLargeCollectionFactory(config.getEnableFileCache());
         ProfilingTimeCounter<EnumProfilingCounters> timeProfiler = ProfilingTimeCounter.createInstance(
                 EnumProfilingCounters.class, config.isProfilingOn()); 
         MemoryProfiler memoryProfiler = MemoryProfiler.createInstance(config.isProfilingOn()); 
         timeProfiler.startCounter(EnumProfilingCounters.INITIALIZATION);
+        List<FileOutputWriter> fileOutputWriters = null;
         try {
             // Load & resolve owl:sameAs links
             URIMappingIterable uriMapping = getURIMapping(); // TODO: canonical URI file
@@ -109,6 +130,9 @@ public class FusionToolDpuExecutor {
             // Initialize CR
             ConflictResolver conflictResolver = createConflictResolver(uriMapping);
 
+            // File outputs
+            fileOutputWriters = createRDFWriters(config.getFileOutputs(), config.getPrefixes());
+            
             // Initialize triple counters
             long outputTriples = 0;
             long inputTriples = 0;
@@ -152,7 +176,7 @@ public class FusionToolDpuExecutor {
 
                 // Write result to output
                 timeProfiler.startCounter(EnumProfilingCounters.OUTPUT_WRITING);
-                writeResults(resolvedQuads);
+                writeResults(resolvedQuads, fileOutputWriters);
                 timeProfiler.stopAddCounter(EnumProfilingCounters.OUTPUT_WRITING);
 
                 memoryProfiler.capture();
@@ -175,6 +199,15 @@ public class FusionToolDpuExecutor {
                     collectionFactory.close();
                 } catch (IOException e) {
                     // do nothing
+                }
+            }
+            if (fileOutputWriters != null) {
+                for (FileOutputWriter writer : fileOutputWriters) {
+                    try {
+                        writer.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
                 }
             }
         }
@@ -272,10 +305,10 @@ public class FusionToolDpuExecutor {
         String query = (config.getSeedResourceSparqlQuery() != null) 
                 ? config.getSeedResourceSparqlQuery()
                 : "SELECT DISTINCT ?s WHERE {?s ?p ?o}";
-        
-                MyTupleQueryResult queryResult = null;
+        TupleQueryResult queryResult = null;
         try {
-            queryResult = rdfInput.executeSelectQueryAsTuples(query);
+            queryResult = rdfInput.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
+            
             String variableName = null;
             while (queryResult.hasNext()) {
                 BindingSet bindings = queryResult.next();
@@ -290,7 +323,7 @@ public class FusionToolDpuExecutor {
                     seedSubjects.add(canonicalURI); // only store canonical URIs to save space
                 }
             }
-        } catch (InvalidQueryException e) {
+        } catch (MalformedQueryException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.INVALID_SEED_RESOURCE_QUERY, "Invalid seed resource SPARQL query", e);
         } catch (Exception e) {
@@ -394,15 +427,28 @@ public class FusionToolDpuExecutor {
     
     /**
      * Writes conflict resolution results to DPU outputs.
-     * @param resolvedQuads conflict resolution results 
+     * @param resolvedQuads conflict resolution results
+     * @param fileOutputWriters file output writers
      */
-    protected void writeResults(Collection<ResolvedStatement> resolvedQuads) {
+    protected void writeResults(Collection<ResolvedStatement> resolvedQuads, List<FileOutputWriter> fileOutputWriters) {
         for (ResolvedStatement resolvedStatement : resolvedQuads) {
             Statement statement = resolvedStatement.getStatement();
             rdfOutput.addTriple(statement.getSubject(), statement.getPredicate(), statement.getObject());
+
+            Integer maxOutputQuads = config.getFileOutputMaxResolvedQUads();
+            if (maxOutputQuads == null || this.fileOutputWrittenQuads < maxOutputQuads) {
+                for (FileOutputWriter writer : fileOutputWriters) {
+                    try {
+                        writer.writeResolvedStatements(resolvedQuads.iterator());
+                    } catch (IOException e) {
+                        LOG.warn("Error when writing {} to file output: {}", resolvedStatement, e.getMessage());
+                    }
+                }
+                this.fileOutputWrittenQuads++;
+            }
         }
     }
-    
+
     /**
      * Writes canonical URIs to a file specified in configuration.
      * @param resolvedCanonicalURIs resolved canonical URIs
@@ -417,6 +463,33 @@ public class FusionToolDpuExecutor {
                 throw new FusionToolDpuException(
                         FusionToolDpuErrorCodes.WRITE_CANONICAL_URI_FILE, "Cannot write canonical URIs from file", e);
             }
+        }
+    }
+    
+    /**
+     * Creates and initializes output writers.
+     * @param outputs specification of data outputs
+     * @param nsPrefixes namespace prefix mappings
+     * @return output writers 
+     * @throws FusionToolDpuException configuration error
+     */
+    protected List<FileOutputWriter> createRDFWriters(List<FileOutput> outputs, Map<String, String> nsPrefixes)
+            throws FusionToolDpuException {
+        
+        try {
+            List<FileOutputWriter> writers = new LinkedList<FileOutputWriter>();
+            for (FileOutput output : outputs) {
+                FileOutputWriter writer = RDF_WRITER_FACTORY.createRDFWriter(output, executionContext.getResultDir());
+                writers.add(writer);
+
+                for (Map.Entry<String, String> entry : nsPrefixes.entrySet()) {
+                    writer.addNamespace(entry.getKey(), entry.getValue());
+                }
+            }
+            return writers;
+        } catch (IOException e) {
+            throw new FusionToolDpuException(FusionToolDpuErrorCodes.FILE_OUTPUT_WRITER_CREATION,
+                    "Error when creating file output writers");
         }
     }
 }

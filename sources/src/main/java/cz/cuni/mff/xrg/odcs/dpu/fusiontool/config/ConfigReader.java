@@ -3,8 +3,10 @@
  */
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool.config;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,12 +21,14 @@ import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolutionStrategyImpl;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.ConfigXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.ConflictResolutionXml;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.FileOutputXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.ParamXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.PrefixXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.PropertyResolutionStrategyXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.PropertyXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.config.xml.ResolutionStrategyXml;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.InvalidInputException;
+import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.EnumSerializationFormat;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.io.FileNameSanitizer;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.util.NamespacePrefixExpander;
 
@@ -91,6 +95,17 @@ public final class ConfigReader {
                     prefixExpander));
         }
 
+        // File outputs
+        List<FileOutput> outputs = new LinkedList<FileOutput>();
+        if (configXml.getFileOutputs() != null) {
+            for (FileOutputXml fileOutputXml : configXml.getFileOutputs().getFileOutputs()) {
+                outputs.add(extractFileOutput(fileOutputXml));
+            }
+            if (configXml.getFileOutputs().getMaxResolvedQuads() != null) {
+                config.setFileOutputMaxResolvedQuads(configXml.getFileOutputs().getMaxResolvedQuads());
+            }
+        }
+        config.setFileOutputs(outputs);
         return config;
     }
 
@@ -118,6 +133,43 @@ public final class ConfigReader {
             strategy.setParams(extractAllParams(strategyXml.getParams()));
         }
         return strategy;
+    }
+    
+
+    private FileOutput extractFileOutput(FileOutputXml fileOutputXml) throws InvalidInputException {
+        File path = new File(fileOutputXml.getPath());
+        if (path.getAbsoluteFile() == null || path.getAbsoluteFile().getParentFile() == null) {
+            throw new InvalidInputException("Path '" + fileOutputXml.getPath() + "' is not a valid file path."); 
+        }
+        
+        EnumSerializationFormat format = EnumSerializationFormat.parseFormat(fileOutputXml.getFormat());
+        if (format == null) {
+            throw new InvalidInputException("Unknown file output format '" + fileOutputXml.getFormat() + "'");
+        }
+        
+        FileOutputImpl output = new FileOutputImpl(path, format);
+        
+        String metadataContextString = fileOutputXml.getMetadataContext();
+        if (!ODCSUtils.isNullOrEmpty(metadataContextString)) {
+            URI context = convertToURI(metadataContextString, "metadataContext is not a valid URI");
+            output.setMetadataContext(context);
+        }
+        
+        String dataContextString = fileOutputXml.getDataContext();
+        if (!ODCSUtils.isNullOrEmpty(dataContextString)) {
+            URI context = convertToURI(dataContextString, "dataContext is not a valid URI");
+            output.setDataContext(context);
+        }
+
+        return output;
+    }
+    
+    private URI convertToURI(String str, String errorMessage) throws InvalidInputException {
+        try {
+            return ValueFactoryImpl.getInstance().createURI(str);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException(errorMessage, e);
+        }
     }
 
     private Map<String, String> extractAllParams(List<ParamXml> params) {

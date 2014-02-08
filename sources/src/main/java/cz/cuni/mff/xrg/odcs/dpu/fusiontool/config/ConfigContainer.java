@@ -1,6 +1,7 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool.config;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.openrdf.model.URI;
@@ -61,6 +62,12 @@ public interface ConfigContainer {
     boolean getEnableFileCache();
     
     /**
+     * List of result data file outputs.
+     * @return list of result data file outputs
+     */
+    List<FileOutput> getFileOutputs();
+    
+    /**
      * SPARQL query returning URI resources which are initially loaded and processed.
      * The query must be a SELECT query binding a single variable in the result set.
      * If given, triples having matching resources and triples reachable from them are processed. All data
@@ -81,4 +88,10 @@ public interface ConfigContainer {
      * @return true iff profiling logs should be printed
      */
     boolean isProfilingOn();
+    
+    /**
+     * Returns the maximum number of resolved quads to be written to file outputs.
+     * @return number of resolved quads to be written
+     */
+    Integer getFileOutputMaxResolvedQUads();
 }

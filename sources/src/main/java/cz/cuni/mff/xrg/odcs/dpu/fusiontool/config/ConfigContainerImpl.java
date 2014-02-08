@@ -2,6 +2,8 @@ package cz.cuni.mff.xrg.odcs.dpu.fusiontool.config;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.openrdf.model.URI;
@@ -19,10 +21,12 @@ public class ConfigContainerImpl implements ConfigContainer {
     private Map<String, String> prefixes = new HashMap<String, String>();
     private ResolutionStrategy defaultResolutionStrategy = new ResolutionStrategyImpl();
     private Map<URI, ResolutionStrategy> propertyResolutionStrategies = new HashMap<URI, ResolutionStrategy>();
+    private List<FileOutput> fileOutputs = new LinkedList<FileOutput>();
 
     private boolean enableFileCache = false;
     private boolean isProfilingOn = false;
     private String canonicalURIsFileName = null;
+    private Integer fileOutputMaxResolvedQuads = null;
 
     @Override
     public String getSeedResourceSparqlQuery() {
@@ -114,6 +118,19 @@ public class ConfigContainerImpl implements ConfigContainer {
     public void setEnableFileCache(boolean enableFileCache) {
         this.enableFileCache = enableFileCache;
     }
+    
+    @Override
+    public List<FileOutput> getFileOutputs() {
+        return fileOutputs;
+    }
+    
+    /**
+     * Sets result outputs.
+     * @param fileOutputs list of file outputs 
+     */
+    public void setFileOutputs(List<FileOutput> fileOutputs) {
+        this.fileOutputs = fileOutputs;
+    }
 
     @Override
     public Double getAgreeCoeficient() {
@@ -137,5 +154,17 @@ public class ConfigContainerImpl implements ConfigContainer {
     public void setProfilingOn(boolean isProfilingOn) {
         this.isProfilingOn = isProfilingOn;
     }
+
+    @Override
+    public Integer getFileOutputMaxResolvedQUads() {
+        return fileOutputMaxResolvedQuads;
+    }
     
+    /**
+     * Sets value for {@link #getFileOutputMaxResolvedQUads()}.
+     * @param fileOutputMaxResolvedQuads see {@link #getFileOutputMaxResolvedQUads()}
+     */
+    public void setFileOutputMaxResolvedQuads(Integer fileOutputMaxResolvedQuads) {
+        this.fileOutputMaxResolvedQuads  = fileOutputMaxResolvedQuads;
+    }
 }

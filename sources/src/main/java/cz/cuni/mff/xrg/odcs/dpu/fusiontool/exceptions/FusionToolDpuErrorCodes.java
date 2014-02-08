@@ -21,5 +21,8 @@ public final class FusionToolDpuErrorCodes {
     public static final int CONFLICT_RESOLUTION = 6;
     public static final int READ_CANONICAL_URI_FILE = 7;
     public static final int WRITE_CANONICAL_URI_FILE = 8;
+    public static final int FILE_OUTPUT_PARAM = 9;
+    public static final int FILE_OUTPUT_WRITER_CREATION = 10;
+    public static final int FILE_OUTPUT_DIRECTORY = 11;
     
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.openrdf.OpenRDFException;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -11,6 +12,8 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +23,6 @@ import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.exceptions.FusionToolDpuException;
 import cz.cuni.mff.xrg.odcs.dpu.fusiontool.urimapping.AlternativeURINavigator;
 import cz.cuni.mff.xrg.odcs.rdf.exceptions.InvalidQueryException;
-import cz.cuni.mff.xrg.odcs.rdf.impl.MyTupleQueryResult;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 /**
@@ -142,9 +144,9 @@ public class QuadLoader {
     private void addQuadsFromQuery(String sparqlQuery, Collection<Statement> quads)
             throws InvalidQueryException, QueryEvaluationException {
 
-        MyTupleQueryResult queryResult = null;
+        TupleQueryResult queryResult = null;
         try {
-            queryResult = rdfData.executeSelectQueryAsTuples(sparqlQuery);
+            queryResult = rdfData.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery).evaluate();
             while (queryResult.hasNext()) {
                 
                 BindingSet bindings = queryResult.next();
@@ -155,6 +157,8 @@ public class QuadLoader {
                         rdfData.getDataGraph());
                 quads.add(quad);
             }
+        } catch (OpenRDFException e) {
+            throw new QueryEvaluationException(e);
         } finally {
             if (queryResult != null) {
                 queryResult.close();
