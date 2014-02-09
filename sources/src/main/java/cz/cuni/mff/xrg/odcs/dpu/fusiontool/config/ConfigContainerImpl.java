@@ -143,6 +143,11 @@ public class ConfigContainerImpl implements ConfigContainer {
     }
     
     @Override
+    public int getTriplesChunkSize() {
+        return ConfigConstants.TRIPLES_CHUNK_SIZE;
+    }
+    
+    @Override
     public boolean isProfilingOn() {
         return isProfilingOn; 
     }

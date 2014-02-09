@@ -2,7 +2,9 @@ package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -42,9 +44,16 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
      * Input data to be processed by data fusion.
      */
     @InputDataUnit(name = "input", optional = false,
-            description = "Input data to be processed by data fusion with conflict resolution")
+            description = "Input data to be processed by data fusion")
     public RDFDataUnit rdfInput;
-
+    
+    /**
+     * Second source of input data to be processed by data fusion.
+     */
+    @InputDataUnit(name = "input2", optional = true,
+            description = "Second source of input data to be processed by data fusion")
+    public RDFDataUnit rdfInput2;
+    
     /**
      * owl:sameAs links to be used during conflict resolution.
      */
@@ -97,11 +106,15 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         long startTime = System.currentTimeMillis();
         LOG.info("Starting data fusion, this may take a while...");
         try {
+            List<RDFDataUnit> rdfInputs = new ArrayList<RDFDataUnit>();
+            rdfInputs.add(rdfInput);
+            rdfInputs.add(rdfInput2);
+            
             // Execute data fusion
             FusionToolDpuExecutor executor = new FusionToolDpuExecutor(
                     configContainer, 
                     context, 
-                    rdfInput,
+                    rdfInputs,
                     sameAsInput,
                     metadataInput, 
                     rdfOutput);

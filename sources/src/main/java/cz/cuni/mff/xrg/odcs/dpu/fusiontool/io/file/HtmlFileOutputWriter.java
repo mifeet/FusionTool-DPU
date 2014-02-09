@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -89,17 +90,16 @@ public class HtmlFileOutputWriter implements FileOutputWriter {
         writer.write(";\">");
         writer.write(String.format(Locale.ROOT, "%.5f", quality));
         writer.write("</td>");
-        // TODO
-        //        writer.write("<td>");
-        //        boolean first = true;
-        //        for (Resource sourceURI : resolvedStatement.getSourceGraphNames()) {
-        //            if (!first) {
-        //                writer.write(", ");
-        //            }
-        //            first = false;
-        //            writeAbsoluteLink(writer,  sourceURI.stringValue(), getPrefixedURI(sourceURI.stringValue()));
-        //        }
-        //        writer.write("</td>");
+        writer.write("<td>");
+        boolean first = true;
+        for (Resource sourceURI : resolvedStatement.getSourceGraphNames()) {
+            if (!first) {
+                writer.write(", ");
+            }
+            first = false;
+            writeAbsoluteLink(writer,  sourceURI.stringValue(), getPrefixedURI(sourceURI.stringValue()));
+        }
+        writer.write("</td>");
         writer.write("</tr>\n");
     }
 
@@ -134,7 +134,7 @@ public class HtmlFileOutputWriter implements FileOutputWriter {
                 + "\n</head>\n<body>");
         writer.write(" <table border=\"1\" cellspacing=\"0\" cellpadding=\"2\">\n");
         writer.write("  <tr><th>Subject</th><th>Predicate</th><th>Object</th>"
-                + "<th>Quality</th></tr>\n"); // TODO: <th>Source named graphs</th>
+                + "<th>Quality</th><th>Source named graphs</th></tr>\n");
     }
     
 

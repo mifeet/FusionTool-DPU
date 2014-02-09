@@ -94,4 +94,10 @@ public interface ConfigContainer {
      * @return number of resolved quads to be written
      */
     Integer getFileOutputMaxResolvedQUads();
+    
+    /**
+     * Chunk size for operations with triples on top of a repository connection.
+     * @return chunk size
+     */
+    int getTriplesChunkSize();
 }

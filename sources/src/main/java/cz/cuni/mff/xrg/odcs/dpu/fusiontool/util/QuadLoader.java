@@ -76,17 +76,19 @@ public class QuadLoader {
     private static final String OBJECT_VAR = "o";
 
     private final AlternativeURINavigator alternativeURINavigator;
-    private final RDFDataUnit rdfData;
+    private final List<RDFDataUnit> rdfDataUnits;
     private final PrefixDeclBuilder nsPrefixes;
 
     /**
      * Creates a new instance.
-     * @param rdfData input data
+     * @param rdfDataUnits input data
      * @param alternativeURINavigator container of alternative owl:sameAs variants for URIs
      * @param nsPrefixes holder for namespace prefixes
      */
-    public QuadLoader(RDFDataUnit rdfData, AlternativeURINavigator alternativeURINavigator, PrefixDeclBuilder nsPrefixes) {
-        this.rdfData = rdfData;
+    public QuadLoader(
+            List<RDFDataUnit> rdfDataUnits, AlternativeURINavigator alternativeURINavigator, PrefixDeclBuilder nsPrefixes) {
+        
+        this.rdfDataUnits = rdfDataUnits;
         this.alternativeURINavigator = alternativeURINavigator;
         this.nsPrefixes = nsPrefixes;
     }
@@ -108,14 +110,17 @@ public class QuadLoader {
         Collection<Statement> result = new ArrayList<Statement>();
 
         try {
-            if (alternativeURIs.size() <= 1) {
-                String query = String.format(QUADS_QUERY_SIMPLE, nsPrefixes.getPrefixDecl(), uri);
-                addQuadsFromQuery(query, result);
-            } else {
-                Iterable<CharSequence> limitedURIListBuilder = new LimitedURIListBuilder(alternativeURIs, MAX_QUERY_LIST_LENGTH);
-                for (CharSequence uriList : limitedURIListBuilder) {
-                    String query = String.format(QUADS_QUERY_ALTERNATIVE, nsPrefixes.getPrefixDecl(), uriList);
-                    addQuadsFromQuery(query, result);
+            for (RDFDataUnit rdfData : this.rdfDataUnits) {
+                if (alternativeURIs.size() <= 1) {
+                    String query = String.format(QUADS_QUERY_SIMPLE, nsPrefixes.getPrefixDecl(), uri);
+                    addQuadsFromQuery(rdfData, query, result);
+                } else {
+                    Iterable<CharSequence> limitedURIListBuilder = 
+                            new LimitedURIListBuilder(alternativeURIs, MAX_QUERY_LIST_LENGTH);
+                    for (CharSequence uriList : limitedURIListBuilder) {
+                        String query = String.format(QUADS_QUERY_ALTERNATIVE, nsPrefixes.getPrefixDecl(), uriList);
+                        addQuadsFromQuery(rdfData, query, result);
+                    }
                 }
             }
         } catch (InvalidQueryException e) {
@@ -136,12 +141,13 @@ public class QuadLoader {
 
     /**
      * Execute the given SPARQL SELECT and constructs a collection of quads from the result.
+     * @param rdfData input RDF data
      * @param sparqlQuery a SPARQL SELECT query with four variables in the result: named graph, subject, property
      * @param quads collection where the retrieved quads are added
      * @throws InvalidQueryException query error
      * @throws QueryEvaluationException query error
      */
-    private void addQuadsFromQuery(String sparqlQuery, Collection<Statement> quads)
+    private void addQuadsFromQuery(RDFDataUnit rdfData, String sparqlQuery, Collection<Statement> quads)
             throws InvalidQueryException, QueryEvaluationException {
 
         TupleQueryResult queryResult = null;

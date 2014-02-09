@@ -9,7 +9,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>fusion-tool-dpu</artifactId>
-	<version>0.2.0</version>
+	<version>0.2.1</version>
 	<packaging>bundle</packaging>
 	<description>Data fusion tool ODCS-FusionTool implemented as ODCleanStore DPU.</description>
 

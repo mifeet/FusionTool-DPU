@@ -58,6 +58,11 @@ public final class ConfigConstants {
     public static final int MAX_QUERY_LIST_LENGTH = 25;
     
     /**
+     * Chunk size for operations with triples on top of a repository connection.
+     */
+    public static final int TRIPLES_CHUNK_SIZE = 1000;
+    
+    /**
      * Set of default preferred canonical URIs. 
      */
     public static final Collection<String> DEFAULT_PREFERRED_CANONICAL_URIS = Arrays.asList(

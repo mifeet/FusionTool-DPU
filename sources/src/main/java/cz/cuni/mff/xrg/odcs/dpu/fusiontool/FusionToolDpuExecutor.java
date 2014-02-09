@@ -72,7 +72,7 @@ public class FusionToolDpuExecutor {
     
     private ConfigContainer config;
     private DPUContext executionContext;
-    private RDFDataUnit rdfInput;
+    private List<RDFDataUnit> rdfInputs;
     private RDFDataUnit sameAsInput;
     private RDFDataUnit metadataInput;
     private RDFDataUnit rdfOutput;
@@ -83,16 +83,16 @@ public class FusionToolDpuExecutor {
      * Creates a new instance.
      * @param config configuration
      * @param executionContext execution context
-     * @param rdfInput RDF input data
+     * @param rdfInputs RDF input data
      * @param sameAsInput input owl:sameAs links
      * @param metadataInput input metadata
      * @param rdfOutput RDF output data
      */
-    public FusionToolDpuExecutor(ConfigContainer config, DPUContext executionContext, RDFDataUnit rdfInput,
+    public FusionToolDpuExecutor(ConfigContainer config, DPUContext executionContext, List<RDFDataUnit> rdfInputs,
             RDFDataUnit sameAsInput, RDFDataUnit metadataInput, RDFDataUnit rdfOutput) {
         this.config = config;
         this.executionContext = executionContext;
-        this.rdfInput = rdfInput;
+        this.rdfInputs = rdfInputs;
         this.sameAsInput = sameAsInput;
         this.metadataInput = metadataInput;
         this.rdfOutput = rdfOutput;
@@ -139,7 +139,7 @@ public class FusionToolDpuExecutor {
             
             // Load & process relevant triples (quads) subject by subject so that we can apply CR to them
             PrefixDeclBuilder nsPrefixes = new PrefixDeclBuilderImpl(config.getPrefixes());
-            QuadLoader quadLoader = new QuadLoader(rdfInput, alternativeURINavigator, nsPrefixes);
+            QuadLoader quadLoader = new QuadLoader(rdfInputs, alternativeURINavigator, nsPrefixes);
             timeProfiler.stopAddCounter(EnumProfilingCounters.INITIALIZATION);
             while (queuedSubjects.hasNext() && !executionContext.canceled()) {
                 timeProfiler.startCounter(EnumProfilingCounters.BUFFERING);
@@ -307,20 +307,22 @@ public class FusionToolDpuExecutor {
                 : "SELECT DISTINCT ?s WHERE {?s ?p ?o}";
         TupleQueryResult queryResult = null;
         try {
-            queryResult = rdfInput.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
-            
-            String variableName = null;
-            while (queryResult.hasNext()) {
-                BindingSet bindings = queryResult.next();
-                if (variableName == null) {
-                    variableName = bindings.getBindingNames().iterator().next();
-                }
-
-                Value subject = bindings.getValue(variableName);
-                String uri = ODCSUtils.getVirtuosoNodeURI(subject);
-                if (uri != null) {
-                    String canonicalURI = uriMapping.getCanonicalURI(subject.stringValue());
-                    seedSubjects.add(canonicalURI); // only store canonical URIs to save space
+            for (RDFDataUnit rdfInput : rdfInputs) {
+                queryResult = rdfInput.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, query).evaluate();
+                
+                String variableName = null;
+                while (queryResult.hasNext()) {
+                    BindingSet bindings = queryResult.next();
+                    if (variableName == null) {
+                        variableName = bindings.getBindingNames().iterator().next();
+                    }
+    
+                    Value subject = bindings.getValue(variableName);
+                    String uri = ODCSUtils.getVirtuosoNodeURI(subject);
+                    if (uri != null) {
+                        String canonicalURI = uriMapping.getCanonicalURI(subject.stringValue());
+                        seedSubjects.add(canonicalURI); // only store canonical URIs to save space
+                    }
                 }
             }
         } catch (MalformedQueryException e) {
@@ -353,9 +355,8 @@ public class FusionToolDpuExecutor {
      * @return initialized conflict resolver
      */
     protected ConflictResolver createConflictResolver(URIMappingIterable uriMapping) {
-        final int chunkSize = 1000;
         Model metadata = new TreeModel();
-        LazyTriples metadataTriples = metadataInput.getTriplesIterator(chunkSize);
+        LazyTriples metadataTriples = metadataInput.getTriplesIterator(config.getTriplesChunkSize());
         while (metadataTriples.hasNextTriples()) {
             metadata.addAll(metadataTriples.getTriples());
         }
