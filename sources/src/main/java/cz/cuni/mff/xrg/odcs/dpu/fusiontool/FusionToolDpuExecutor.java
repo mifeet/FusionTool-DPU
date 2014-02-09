@@ -163,8 +163,10 @@ public class FusionToolDpuExecutor {
                 timeProfiler.startCounter(EnumProfilingCounters.CONFLICT_RESOLUTION);
                 Collection<ResolvedStatement> resolvedQuads = conflictResolver.resolveConflicts(quads);
                 timeProfiler.stopAddCounter(EnumProfilingCounters.CONFLICT_RESOLUTION);
-                LOG.trace("Resolved {} quads for URI <{}> resulting in {} quads (processed totally {} quads)",
-                        new Object[] { quads.size(), canonicalURI, resolvedQuads.size(), inputTriples});
+                
+                // LOG.trace("Resolved {} quads for URI <{}> resulting in {} quads (processed totally {} quads)",
+                // new Object[] { quads.size(), canonicalURI, resolvedQuads.size(), inputTriples});
+                
                 outputTriples += resolvedQuads.size();
 
                 // Add objects filtered by CR for traversal
