@@ -44,26 +44,26 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
      * Input data to be processed by data fusion.
      */
     @InputDataUnit(name = "input", optional = false,
-            description = "Input data to be processed by data fusion")
+            description = "Input data to be processed by data fusion (required)")
     public RDFDataUnit rdfInput;
     
     /**
      * Second source of input data to be processed by data fusion.
      */
     @InputDataUnit(name = "input2", optional = true,
-            description = "Second source of input data to be processed by data fusion")
+            description = "Second source of input data to be processed by data fusion (optional)")
     public RDFDataUnit rdfInput2;
     
     /**
      * owl:sameAs links to be used during conflict resolution.
      */
-    @InputDataUnit(name = "sameAs", optional = true, description = "owl:sameAs links to be used during conflict resolution")
+    @InputDataUnit(name = "sameAs", optional = true, description = "owl:sameAs links to be used during conflict resolution (optional)")
     public RDFDataUnit sameAsInput;
     
     /**
      * Metadata used during conflict resolution.
      */
-    @InputDataUnit(name = "metadata", optional = true, description = "Metadata used during conflict resolution")
+    @InputDataUnit(name = "metadata", optional = true, description = "Metadata used during conflict resolution (optional)")
     public RDFDataUnit metadataInput;
 
     /**
