@@ -1,28 +1,5 @@
 package cz.cuni.mff.xrg.odcs.dpu.fusiontool;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.openrdf.model.Graph;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cz.cuni.mff.odcleanstore.conflictresolution.ConflictResolver;
 import cz.cuni.mff.odcleanstore.conflictresolution.ConflictResolverFactory;
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionFunctionRegistry;
@@ -57,6 +34,29 @@ import cz.cuni.mff.xrg.odcs.dpu.fusiontool.util.UriQueueImpl;
 import cz.cuni.mff.xrg.odcs.rdf.exceptions.InvalidQueryException;
 import cz.cuni.mff.xrg.odcs.rdf.help.LazyTriples;
 import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
+import org.openrdf.model.BNode;
+import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.TreeModel;
+import org.openrdf.model.vocabulary.OWL;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQueryResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Fuses RDF data from input using ODCS Conflict Resolution and writes the output to RDF outputs.
@@ -318,7 +318,7 @@ public class FusionToolDpuExecutor {
                     }
     
                     Value subject = bindings.getValue(variableName);
-                    String uri = ODCSUtils.getVirtuosoNodeURI(subject);
+                    String uri = ODCSUtils.isVirtuosoBlankNode(subject) ? ODCSUtils.getVirtuosoURIForBlankNode((BNode) subject) : subject.stringValue();
                     if (uri != null) {
                         String canonicalURI = uriMapping.getCanonicalURI(subject.stringValue());
                         seedSubjects.add(canonicalURI); // only store canonical URIs to save space
@@ -392,7 +392,8 @@ public class FusionToolDpuExecutor {
             Set<String> resolvedCanonicalURIs) {
         
         for (ResolvedStatement resolvedStatement : resolvedStatements) {
-            String uri = ODCSUtils.getVirtuosoNodeURI(resolvedStatement.getStatement().getObject());
+            Value object = resolvedStatement.getStatement().getObject();
+            String uri = ODCSUtils.isVirtuosoBlankNode(object) ? ODCSUtils.getVirtuosoURIForBlankNode((BNode) object) : object.stringValue();
             if (uri == null) {
                 // a literal or something, skip it
                 continue;
