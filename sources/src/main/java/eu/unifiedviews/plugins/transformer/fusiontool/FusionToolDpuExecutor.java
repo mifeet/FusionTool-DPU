@@ -41,10 +41,14 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.vocabulary.OWL;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.GraphQueryResult;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.RepositoryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +77,7 @@ public class FusionToolDpuExecutor {
     private List<RDFDataUnit> rdfInputs;
     private RDFDataUnit sameAsInput;
     private RDFDataUnit metadataInput;
-    private RDFDataUnit rdfOutput;
+    private WritableRDFDataUnit rdfOutput;
     private boolean hasFusionToolRan;
     private int fileOutputWrittenQuads;
 
@@ -87,7 +91,7 @@ public class FusionToolDpuExecutor {
      * @param rdfOutput RDF output data
      */
     public FusionToolDpuExecutor(ConfigContainer config, DPUContext executionContext, List<RDFDataUnit> rdfInputs,
-            RDFDataUnit sameAsInput, RDFDataUnit metadataInput, RDFDataUnit rdfOutput) {
+            RDFDataUnit sameAsInput, RDFDataUnit metadataInput, WritableRDFDataUnit rdfOutput) {
         this.config = config;
         this.executionContext = executionContext;
         this.rdfInputs = rdfInputs;
@@ -191,6 +195,9 @@ public class FusionToolDpuExecutor {
         } catch (ConflictResolutionException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.CONFLICT_RESOLUTION, "Conflict resolution error: " + e.getMessage(), e);
+        } catch (RepositoryException e) {
+            throw new FusionToolDpuException(
+                    FusionToolDpuErrorCodes.REPOSITORY_ERROR, "Repository error: " + e.getMessage(), e);
         } finally {
             if (collectionFactory != null) {
                 try {
@@ -245,12 +252,13 @@ public class FusionToolDpuExecutor {
                 config.getPreferredCanonicalURIs());
         
         URIMappingIterableImpl uriMapping = new URIMappingIterableImpl(preferredURIs);
-        Graph sameAsTriples;
         try {
-            sameAsTriples = sameAsInput.executeConstructQuery(
-                    String.format("CONSTRUCT {?s <%1$s> ?o} WHERE {?s <%1$s> ?o}", OWL.SAMEAS));
-            uriMapping.addLinks(sameAsTriples.iterator());
-        } catch (InvalidQueryException e) {
+            String query = String.format("CONSTRUCT {?s <%1$s> ?o} WHERE {?s <%1$s> ?o}", OWL.SAMEAS);
+            GraphQueryResult sameAsTriples = sameAsInput.getConnection().prepareGraphQuery(QueryLanguage.SPARQL, query).evaluate();
+            while (sameAsTriples.hasNext()) {
+                uriMapping.addLink(sameAsTriples.next());
+            }
+        } catch (OpenRDFException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.SAME_AS_LOADING_ERROR, "Error when loading owl:sameAs links from input", e);
         }
@@ -352,13 +360,19 @@ public class FusionToolDpuExecutor {
      * @param uriMapping mapping of URIs to their canonical URI
      * @return initialized conflict resolver
      */
-    protected ConflictResolver createConflictResolver(URIMappingIterable uriMapping) {
+    protected ConflictResolver createConflictResolver(URIMappingIterable uriMapping) throws FusionToolDpuException {
         Model metadata = new TreeModel();
-        LazyTriples metadataTriples = metadataInput.getTriplesIterator(config.getTriplesChunkSize());
-        while (metadataTriples.hasNextTriples()) {
-            metadata.addAll(metadataTriples.getTriples());
+        RepositoryResult<Statement> metadataResult = null;
+        try {
+            metadataResult = metadataInput.getConnection().getStatements(null, null, null, false);
+            while (metadataResult.hasNext()) {
+                metadata.add(metadataResult.next());
+            }
+        } catch (RepositoryException e) {
+            throw new FusionToolDpuException(
+                    FusionToolDpuErrorCodes.METADATA_LOADING_ERROR, "Error when loading metadata from input", e);
         }
-        
+
         ResolutionFunctionRegistry registry = ConflictResolverFactory.createInitializedResolutionFunctionRegistry(
                 new DummySourceQualityCalculator(), 
                 config.getAgreeCoeficient(),
@@ -430,10 +444,11 @@ public class FusionToolDpuExecutor {
      * @param resolvedQuads conflict resolution results
      * @param fileOutputWriters file output writers
      */
-    protected void writeResults(Collection<ResolvedStatement> resolvedQuads, List<FileOutputWriter> fileOutputWriters) {
+    protected void writeResults(Collection<ResolvedStatement> resolvedQuads, List<FileOutputWriter> fileOutputWriters) throws RepositoryException {
+        RepositoryConnection connection = rdfOutput.getConnection();
         for (ResolvedStatement resolvedStatement : resolvedQuads) {
             Statement statement = resolvedStatement.getStatement();
-            rdfOutput.addTriple(statement.getSubject(), statement.getPredicate(), statement.getObject());
+            connection.add(statement.getSubject(), statement.getPredicate(), statement.getObject());
 
             Integer maxOutputQuads = config.getFileOutputMaxResolvedQUads();
             if (maxOutputQuads == null || this.fileOutputWrittenQuads < maxOutputQuads) {
