@@ -1,7 +1,7 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.exceptions;
 
-import cz.cuni.mff.xrg.odcs.commons.dpu.DPUException;
 
+import eu.unifiedviews.dpu.DPUException;
 
 /**
  * A general Fusion Tool DPU exception.

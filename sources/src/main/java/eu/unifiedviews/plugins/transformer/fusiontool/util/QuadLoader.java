@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -22,8 +23,6 @@ import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigConstants;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.AlternativeURINavigator;
-import cz.cuni.mff.xrg.odcs.rdf.exceptions.InvalidQueryException;
-import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 /**
  * Loads statements having a given URI as their subject, taking into consideration
@@ -123,9 +122,6 @@ public class QuadLoader {
                     }
                 }
             }
-        } catch (InvalidQueryException e) {
-            throw new FusionToolDpuException(
-                    FusionToolDpuErrorCodes.QUERY_QUADS, "Invalid query when loading quads for URI " + uri, e);
         } catch (QueryEvaluationException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.QUERY_QUADS, "Query evaluation error when loading quads for URI " + uri, e);
@@ -144,11 +140,10 @@ public class QuadLoader {
      * @param rdfData input RDF data
      * @param sparqlQuery a SPARQL SELECT query with four variables in the result: named graph, subject, property
      * @param quads collection where the retrieved quads are added
-     * @throws InvalidQueryException query error
      * @throws QueryEvaluationException query error
      */
     private void addQuadsFromQuery(RDFDataUnit rdfData, String sparqlQuery, Collection<Statement> quads)
-            throws InvalidQueryException, QueryEvaluationException {
+            throws QueryEvaluationException {
 
         TupleQueryResult queryResult = null;
         try {

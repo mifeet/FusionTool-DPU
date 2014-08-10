@@ -1,59 +1,134 @@
 <?xml version="1.0"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>cz.cuni.mff.xrg.odcs</groupId>
-		<artifactId>module-core</artifactId>
-		<version>1.0.0</version>
-	</parent>
-	<artifactId>fusion-tool-dpu</artifactId>
-	<version>0.3.0-SNAPSHOT</version>
-	<packaging>bundle</packaging>
-	<description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</description>
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-	<properties>
-		<dpu.description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</dpu.description>
-		<dpu.package>eu.unifiedviews.plugins.transformer.fusiontool</dpu.package>
-		<dpu.mainClass>FusionToolDpu</dpu.mainClass>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<odcs-cr-version>1.1.5</odcs-cr-version>
-	</properties>
+    <groupId>eu.unifiedviews.plugins</groupId>
+    <artifactId>uv-t-fusionTool</artifactId>
+    <name>T-FusionTool</name>
+    <version>0.3.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+    <description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</description>
 
-	<repositories>
-		<repository>
-			<id>odcleanstore-1</id>
-			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/releases/</url>
-		</repository>
-		<repository>
-			<id>odcleanstore-thirdpary</id>
-			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
-		</repository>
-	</repositories>
+    <properties>
+        <dpu.description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</dpu.description>
+        <dpu.package>eu.unifiedviews.plugins.transformer.fusiontool</dpu.package>
+        <dpu.mainClass>FusionToolDpu</dpu.mainClass>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.java.version>1.7</project.java.version>
 
-	<dependencies>
-		<dependency>
-			<groupId>cz.cuni.mff.odcleanstore</groupId>
-			<artifactId>odcs-conflictresolution</artifactId>
-			<version>${odcs-cr-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>cz.cuni.mff.odcleanstore</groupId>
-			<artifactId>odcs-core</artifactId>
-			<version>${odcs-cr-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.simpleframework</groupId>
-			<artifactId>simple-xml</artifactId>
-			<version>2.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mapdb</groupId>
-			<artifactId>mapdb</artifactId>
-			<version>0.9.3</version>
-		</dependency>
-	</dependencies>
+        <odcs-cr-version>1.1.5</odcs-cr-version>
+        <sesame-version>2.7.11</sesame-version>
+        <uv-version>1.0.0</uv-version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>odcleanstore-1</id>
+            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>odcleanstore-thirdpary</id>
+            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+
+        <!-- UnifiedViews dependencies -->
+        <dependency>
+            <groupId>eu.unifiedviews</groupId>
+            <artifactId>uv-dpu-api</artifactId>
+            <version>${uv-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.unifiedviews</groupId>
+            <artifactId>uv-dpu-api-helpers</artifactId>
+            <version>${uv-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.unifiedviews</groupId>
+            <artifactId>uv-dataunit-rdf</artifactId>
+            <version>${uv-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.unifiedviews</groupId>
+            <artifactId>uv-dataunit-files</artifactId>
+            <version>${uv-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.unifiedviews</groupId>
+            <artifactId>uv-dataunit-helpers</artifactId>
+            <version>${uv-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Old ODCleanStore dependencies -->
+        <dependency>
+            <groupId>cz.cuni.mff.odcleanstore</groupId>
+            <artifactId>odcs-conflictresolution</artifactId>
+            <version>${odcs-cr-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cz.cuni.mff.odcleanstore</groupId>
+            <artifactId>odcs-core</artifactId>
+            <version>${odcs-cr-version}</version>
+        </dependency>
+
+        <!-- Sesame -->
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-rdfxml</artifactId>
+            <version>${sesame-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-trig</artifactId>
+            <version>${sesame-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-trix</artifactId>
+            <version>${sesame-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-n3</artifactId>
+            <version>${sesame-version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Other -->
+        <dependency>
+            <groupId>org.simpleframework</groupId>
+            <artifactId>simple-xml</artifactId>
+            <version>2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>0.9.3</version>
+        </dependency>
+    </dependencies>
 
     <licenses>
         <license>
@@ -64,20 +139,40 @@
     </licenses>
 
     <build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>1.2.1</version>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-					    <Export-Package>${dpu.package}*;version="${project.version}"</Export-Package>
-						<Embed-Dependency>simple-xml|mapdb|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${project.java.version}</source>
+                    <target>${project.java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <!-- use provided for dependencies that are provided by application -->
+                        <Embed-Dependency>simple-xml|mapdb|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
+                        <!-- using true cause adding new imports for new packages !! -->
+                        <Embed-Transitive>true</Embed-Transitive>
+                        <Export-Package>${dpu.package}*;version="${project.version}"</Export-Package>
+
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Bundle-Description>${project.description}</Bundle-Description>
+
+                        <!-- information for ODCleanStore -->
+                        <DPU-Package>${dpu.package}</DPU-Package>
+                        <DPU-MainClass>${dpu.mainClass}</DPU-MainClass>
+                        <Build-Time>${maven.build.timestamp}</Build-Time>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

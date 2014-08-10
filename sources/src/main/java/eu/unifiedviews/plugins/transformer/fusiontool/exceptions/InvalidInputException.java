@@ -3,7 +3,8 @@
  */
 package eu.unifiedviews.plugins.transformer.fusiontool.exceptions;
 
-import cz.cuni.mff.xrg.odcs.commons.dpu.DPUException;
+
+import eu.unifiedviews.dpu.DPUException;
 
 /**
  * Exception thrown when an invalid input is given.

@@ -1,6 +1,5 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
-import cz.cuni.mff.xrg.odcs.commons.module.config.DPUConfigObjectBase;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
 
@@ -13,7 +12,7 @@ import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputExc
  * <b>This class must have default (parameter less) constructor!</b>
  * @author Jan Michelfeit
  */
-public class FusionToolConfig extends DPUConfigObjectBase {
+public class FusionToolConfig {
     private static final long serialVersionUID = 1L;
 
     private String xmlConfig;
@@ -41,7 +40,6 @@ public class FusionToolConfig extends DPUConfigObjectBase {
         return xmlConfig;
     }
 
-    @Override
     public boolean isValid() {
         try {
             ConfigReader.parseConfigXml(this.xmlConfig);

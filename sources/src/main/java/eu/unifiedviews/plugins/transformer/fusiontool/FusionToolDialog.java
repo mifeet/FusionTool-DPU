@@ -4,8 +4,8 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextArea;
 
-import cz.cuni.mff.xrg.odcs.commons.configuration.ConfigException;
-import cz.cuni.mff.xrg.odcs.commons.module.dialog.BaseConfigDialog;
+import eu.unifiedviews.dpu.config.DPUConfigException;
+import eu.unifiedviews.helpers.dpu.config.BaseConfigDialog;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
 
@@ -38,14 +38,14 @@ public class FusionToolDialog extends
 
     @Override
     public void setConfiguration(FusionToolConfig conf)
-            throws ConfigException {
+            throws DPUConfigException {
         configTextArea.setValue(conf.getXmlConfig());
     }
 
     @Override
-    public FusionToolConfig getConfiguration() throws ConfigException {
+    public FusionToolConfig getConfiguration() throws DPUConfigException {
         if (!configTextArea.isValid()) {
-            throw new ConfigException("Invalid configuration: " + lastValidationError);
+            throw new DPUConfigException("Invalid configuration: " + lastValidationError);
         } else {
             FusionToolConfig conf = new FusionToolConfig(configTextArea.getValue().trim());
             return conf;

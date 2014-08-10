@@ -8,26 +8,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import eu.unifiedviews.dataunit.DataUnit;
+import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
+import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
+import eu.unifiedviews.dpu.DPU;
+import eu.unifiedviews.dpu.DPUContext;
+import eu.unifiedviews.dpu.DPUException;
+import eu.unifiedviews.helpers.dpu.config.AbstractConfigDialog;
+import eu.unifiedviews.helpers.dpu.config.ConfigDialogProvider;
+import eu.unifiedviews.helpers.dpu.config.ConfigurableBase;
 import org.simpleframework.xml.core.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
-import cz.cuni.mff.xrg.odcs.commons.data.DataUnitException;
-import cz.cuni.mff.xrg.odcs.commons.dpu.DPUContext;
-import cz.cuni.mff.xrg.odcs.commons.dpu.DPUException;
-import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.AsTransformer;
-import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.InputDataUnit;
-import cz.cuni.mff.xrg.odcs.commons.dpu.annotation.OutputDataUnit;
-import cz.cuni.mff.xrg.odcs.commons.module.dpu.ConfigurableBase;
-import cz.cuni.mff.xrg.odcs.commons.web.AbstractConfigDialog;
-import cz.cuni.mff.xrg.odcs.commons.web.ConfigDialogProvider;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainerImpl;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
-import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
 
 /**
  * Implementation of ODCS-FusionTool as an ODCleanStore DPU.
@@ -35,7 +34,7 @@ import cz.cuni.mff.xrg.odcs.rdf.interfaces.RDFDataUnit;
  * Conflict resolution includes resolution of owl:sameAs link, resolution of instance-level conflicts.
  * @author Jan Michelfeit
  */
-@AsTransformer
+@DPU.AsTransformer
 public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements ConfigDialogProvider<FusionToolConfig> {
     private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpu.class);
 
@@ -43,34 +42,36 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     /**
      * Input data to be processed by data fusion.
      */
-    @InputDataUnit(name = "input", optional = false,
+    @DataUnit.AsInput(name = "input", optional = false,
             description = "Input data to be processed by data fusion (required)")
     public RDFDataUnit rdfInput;
     
     /**
      * Second source of input data to be processed by data fusion.
      */
-    @InputDataUnit(name = "input2", optional = true,
+    @DataUnit.AsInput(name = "input2", optional = true,
             description = "Second source of input data to be processed by data fusion (optional)")
     public RDFDataUnit rdfInput2;
     
     /**
      * owl:sameAs links to be used during conflict resolution.
      */
-    @InputDataUnit(name = "sameAs", optional = true, description = "owl:sameAs links to be used during conflict resolution (optional)")
+    @DataUnit.AsInput(name = "sameAs", optional = true,
+        description = "owl:sameAs links to be used during conflict resolution (optional)")
     public RDFDataUnit sameAsInput;
     
     /**
      * Metadata used during conflict resolution.
      */
-    @InputDataUnit(name = "metadata", optional = true, description = "Metadata used during conflict resolution (optional)")
+    @DataUnit.AsInput(name = "metadata", optional = true,
+        description = "Metadata used during conflict resolution (optional)")
     public RDFDataUnit metadataInput;
 
     /**
      * Fused output data.
      */
-    @OutputDataUnit(name = "output", description = "Fused output data")
-    public RDFDataUnit rdfOutput;
+    @DataUnit.AsOutput(name = "output", description = "Fused output data")
+    public WritableRDFDataUnit rdfOutput;
     // CHECKSTYLE:ON
 
     /**
@@ -86,7 +87,7 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     }
 
     @Override
-    public void execute(DPUContext context) throws DPUException, DataUnitException {
+    public void execute(DPUContext context) throws DPUException {
         // Read config
         ConfigContainer configContainer = null;
         try {
