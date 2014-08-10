@@ -1,0 +1,22 @@
+/**
+ * 
+ */
+package eu.unifiedviews.plugins.transformer.fusiontool.config.xml;
+
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
+
+// CHECKSTYLE:OFF
+
+/**
+ * @author Jan Michelfeit
+ */
+@Root(name = "Property")
+public class PropertyXml {
+    @Attribute
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+}
