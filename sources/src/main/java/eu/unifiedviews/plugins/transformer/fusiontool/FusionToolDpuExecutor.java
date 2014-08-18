@@ -9,7 +9,9 @@ import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolution
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.DistanceMeasureImpl;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.DummySourceQualityCalculator;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
+import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
+import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
 import eu.unifiedviews.dpu.DPUContext;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.FileOutput;
@@ -32,8 +34,8 @@ import eu.unifiedviews.plugins.transformer.fusiontool.util.ProfilingTimeCounter;
 import eu.unifiedviews.plugins.transformer.fusiontool.util.QuadLoader;
 import eu.unifiedviews.plugins.transformer.fusiontool.util.UriQueue;
 import eu.unifiedviews.plugins.transformer.fusiontool.util.UriQueueImpl;
+import org.openrdf.OpenRDFException;
 import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -195,7 +197,7 @@ public class FusionToolDpuExecutor {
         } catch (ConflictResolutionException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.CONFLICT_RESOLUTION, "Conflict resolution error: " + e.getMessage(), e);
-        } catch (RepositoryException e) {
+        } catch (RepositoryException | DataUnitException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.REPOSITORY_ERROR, "Repository error: " + e.getMessage(), e);
         } finally {
@@ -258,7 +260,7 @@ public class FusionToolDpuExecutor {
             while (sameAsTriples.hasNext()) {
                 uriMapping.addLink(sameAsTriples.next());
             }
-        } catch (OpenRDFException e) {
+        } catch (OpenRDFException | DataUnitException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.SAME_AS_LOADING_ERROR, "Error when loading owl:sameAs links from input", e);
         }
@@ -368,7 +370,7 @@ public class FusionToolDpuExecutor {
             while (metadataResult.hasNext()) {
                 metadata.add(metadataResult.next());
             }
-        } catch (RepositoryException e) {
+        } catch (RepositoryException | DataUnitException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.METADATA_LOADING_ERROR, "Error when loading metadata from input", e);
         }
@@ -444,7 +446,7 @@ public class FusionToolDpuExecutor {
      * @param resolvedQuads conflict resolution results
      * @param fileOutputWriters file output writers
      */
-    protected void writeResults(Collection<ResolvedStatement> resolvedQuads, List<FileOutputWriter> fileOutputWriters) throws RepositoryException {
+    protected void writeResults(Collection<ResolvedStatement> resolvedQuads, List<FileOutputWriter> fileOutputWriters) throws RepositoryException, DataUnitException {
         RepositoryConnection connection = rdfOutput.getConnection();
         for (ResolvedStatement resolvedStatement : resolvedQuads) {
             Statement statement = resolvedStatement.getStatement();

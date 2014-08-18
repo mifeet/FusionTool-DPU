@@ -1,10 +1,12 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import cz.cuni.mff.odcleanstore.shared.util.LimitedURIListBuilder;
+import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
+import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigConstants;
+import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
+import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
+import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.AlternativeURINavigator;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -18,11 +20,9 @@ import org.openrdf.query.TupleQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cuni.mff.odcleanstore.shared.util.LimitedURIListBuilder;
-import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigConstants;
-import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
-import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
-import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.AlternativeURINavigator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Loads statements having a given URI as their subject, taking into consideration
@@ -47,11 +47,13 @@ public class QuadLoader {
      * Must be formatted with arguments:
      * (1) namespace prefixes declaration
      * (2) searched uri
+     * (3) list of graph names (e.g. "<uri1>,<uri2>,<uri3>")
      */
     private static final String QUADS_QUERY_SIMPLE = "%1$s" 
-            + "\n SELECT DISTINCT (<%2$s> AS ?s) ?p ?o"
+            + "\n SELECT DISTINCT (<%2$s> AS ?s) ?p ?o ?g"
             + "\n WHERE { " 
-            + "\n   <%2$s> ?p ?o "
+            + "\n   graph ?g { <%2$s> ?p ?o }"
+            + "\n   FILTER (?g IN (%3$s))" // FIXME
             + "\n }";
 
     /**
@@ -62,17 +64,20 @@ public class QuadLoader {
      * Must be formatted with arguments:
      * (1) namespace prefixes declaration
      * (2) list of searched URIs (e.g. "<uri1>,<uri2>,<uri3>")
+     * (3) list of graph names (e.g. "<uri1>,<uri2>,<uri3>")
      */
     private static final String QUADS_QUERY_ALTERNATIVE = "%1$s"
-            + "\n SELECT DISTINCT ?s ?p ?o"
+            + "\n SELECT DISTINCT ?s ?p ?o ?g"
             + "\n WHERE {"
-            + "\n   ?s ?p ?o"
+            + "\n   graph ?g {?s ?p ?o}"
+            + "\n   FILTER (?g IN (%3$s))" // FIXME
             + "\n   FILTER (?s IN (%2$s))" // TODO: replace by a large union for efficiency?
             + "\n }";
 
     private static final String SUBJECT_VAR = "s";
     private static final String PROPERTY_VAR = "p";
     private static final String OBJECT_VAR = "o";
+    private static final String GRAPH_VAR = "g";
 
     private final AlternativeURINavigator alternativeURINavigator;
     private final List<RDFDataUnit> rdfDataUnits;
@@ -110,14 +115,15 @@ public class QuadLoader {
 
         try {
             for (RDFDataUnit rdfData : this.rdfDataUnits) {
+                String graphsList = getGraphsList(rdfData);
                 if (alternativeURIs.size() <= 1) {
-                    String query = String.format(QUADS_QUERY_SIMPLE, nsPrefixes.getPrefixDecl(), uri);
+                    String query = String.format(QUADS_QUERY_SIMPLE, nsPrefixes.getPrefixDecl(), uri, graphsList);
                     addQuadsFromQuery(rdfData, query, result);
                 } else {
-                    Iterable<CharSequence> limitedURIListBuilder = 
+                    Iterable<CharSequence> limitedURIListBuilder =
                             new LimitedURIListBuilder(alternativeURIs, MAX_QUERY_LIST_LENGTH);
                     for (CharSequence uriList : limitedURIListBuilder) {
-                        String query = String.format(QUADS_QUERY_ALTERNATIVE, nsPrefixes.getPrefixDecl(), uriList);
+                        String query = String.format(QUADS_QUERY_ALTERNATIVE, nsPrefixes.getPrefixDecl(), uriList, graphsList);
                         addQuadsFromQuery(rdfData, query, result);
                     }
                 }
@@ -125,6 +131,9 @@ public class QuadLoader {
         } catch (QueryEvaluationException e) {
             throw new FusionToolDpuException(
                     FusionToolDpuErrorCodes.QUERY_QUADS, "Query evaluation error when loading quads for URI " + uri, e);
+        } catch (DataUnitException e) {
+            throw new FusionToolDpuException(
+                    FusionToolDpuErrorCodes.QUERY_QUADS, "DataUnit error when loading data for URI " + uri, e);
         }
 
         if (LOG.isTraceEnabled()) {
@@ -133,6 +142,23 @@ public class QuadLoader {
         }
 
         return result;
+    }
+
+    private String getGraphsList(RDFDataUnit rdfData) throws DataUnitException {
+        RDFDataUnit.Iteration it = rdfData.getIteration();
+        StringBuilder stringBuilder = new StringBuilder();
+        if (it.hasNext()) {
+            stringBuilder.append('<');
+            stringBuilder.append(it.next().getDataGraphURI().stringValue());
+            stringBuilder.append('>');
+            while (it.hasNext()) {
+                stringBuilder.append(',');
+                stringBuilder.append('<');
+                stringBuilder.append(it.next().getDataGraphURI().stringValue());
+                stringBuilder.append('>');
+            }
+        }
+        return stringBuilder.toString();
     }
 
     /**
@@ -155,10 +181,10 @@ public class QuadLoader {
                         (Resource) bindings.getValue(SUBJECT_VAR),
                         (URI) bindings.getValue(PROPERTY_VAR),
                         bindings.getValue(OBJECT_VAR),
-                        rdfData.getDataGraph());
+                        (Resource) bindings.getValue(GRAPH_VAR));
                 quads.add(quad);
             }
-        } catch (OpenRDFException e) {
+        } catch (OpenRDFException | DataUnitException e) {
             throw new QueryEvaluationException(e);
         } finally {
             if (queryResult != null) {
