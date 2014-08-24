@@ -70,7 +70,8 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     /**
      * Fused output data.
      */
-    @DataUnit.AsOutput(name = "output", description = "Fused output data")
+    @DataUnit.AsOutput(name = "output", optional = false,
+            description = "Fused output data")
     public WritableRDFDataUnit rdfOutput;
     // CHECKSTYLE:ON
 
