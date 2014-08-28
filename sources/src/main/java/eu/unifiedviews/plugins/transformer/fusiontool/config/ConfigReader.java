@@ -3,19 +3,6 @@
  */
 package eu.unifiedviews.plugins.transformer.fusiontool.config;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionStrategy;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolutionStrategyImpl;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
@@ -31,6 +18,18 @@ import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputExc
 import eu.unifiedviews.plugins.transformer.fusiontool.io.EnumSerializationFormat;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.FileNameSanitizer;
 import eu.unifiedviews.plugins.transformer.fusiontool.util.NamespacePrefixExpander;
+import org.openrdf.model.URI;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Reads the XML configuration file and produces instances of configuration in a {@link ConfigContainer} instance.
@@ -96,13 +95,13 @@ public final class ConfigReader {
         }
 
         // File outputs
-        List<FileOutput> outputs = new LinkedList<FileOutput>();
+        List<FileOutput> outputs = new LinkedList<>();
         if (configXml.getFileOutputs() != null) {
             for (FileOutputXml fileOutputXml : configXml.getFileOutputs().getFileOutputs()) {
                 outputs.add(extractFileOutput(fileOutputXml));
             }
             if (configXml.getFileOutputs().getMaxResolvedQuads() != null) {
-                config.setFileOutputMaxResolvedQuads(configXml.getFileOutputs().getMaxResolvedQuads());
+                config.setMaxOutputTriples(configXml.getFileOutputs().getMaxResolvedQuads());
             }
         }
         config.setFileOutputs(outputs);

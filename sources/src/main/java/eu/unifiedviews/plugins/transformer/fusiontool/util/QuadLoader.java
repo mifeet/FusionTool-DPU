@@ -3,7 +3,7 @@ package eu.unifiedviews.plugins.transformer.fusiontool.util;
 import cz.cuni.mff.odcleanstore.shared.util.LimitedURIListBuilder;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
-import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigConstants;
+import eu.unifiedviews.plugins.transformer.fusiontool.config.FTConfigConstants;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.AlternativeURINavigator;
@@ -37,7 +37,7 @@ public class QuadLoader {
     /**
      * Maximum number of values in a generated argument for the "?var IN (...)" SPARQL construct .
      */
-    protected static final int MAX_QUERY_LIST_LENGTH = ConfigConstants.MAX_QUERY_LIST_LENGTH;
+    protected static final int MAX_QUERY_LIST_LENGTH = FTConfigConstants.MAX_QUERY_LIST_LENGTH;
 
     /**
      * SPARQL query that gets all quads having the given uri as their subject.

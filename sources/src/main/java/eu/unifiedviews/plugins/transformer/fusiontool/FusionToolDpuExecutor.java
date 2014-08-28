@@ -377,7 +377,7 @@ public class FusionToolDpuExecutor {
 
         ResolutionFunctionRegistry registry = ConflictResolverFactory.createInitializedResolutionFunctionRegistry(
                 new DummySourceQualityCalculator(), 
-                config.getAgreeCoeficient(),
+                config.getAgreeCoefficient(),
                 new DistanceMeasureImpl());
 
         ConflictResolver conflictResolver = ConflictResolverFactory.configureResolver()
@@ -452,7 +452,7 @@ public class FusionToolDpuExecutor {
             Statement statement = resolvedStatement.getStatement();
             connection.add(statement.getSubject(), statement.getPredicate(), statement.getObject());
 
-            Integer maxOutputQuads = config.getFileOutputMaxResolvedQUads();
+            Long maxOutputQuads = config.getMaxOutputTriples();
             if (maxOutputQuads == null || this.fileOutputWrittenQuads < maxOutputQuads) {
                 for (FileOutputWriter writer : fileOutputWriters) {
                     try {
