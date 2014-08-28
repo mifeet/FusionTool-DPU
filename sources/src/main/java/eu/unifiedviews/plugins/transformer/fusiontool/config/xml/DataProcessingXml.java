@@ -5,6 +5,7 @@ package eu.unifiedviews.plugins.transformer.fusiontool.config.xml;
 
 import java.util.List;
 
+import cz.cuni.mff.odcleanstore.fusiontool.config.xml.ParamXml;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;

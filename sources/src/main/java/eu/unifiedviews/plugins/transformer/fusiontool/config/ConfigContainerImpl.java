@@ -22,7 +22,6 @@ public class ConfigContainerImpl implements ConfigContainer {
     private ResolutionStrategy defaultResolutionStrategy = new ResolutionStrategyImpl();
     private Map<URI, ResolutionStrategy> propertyResolutionStrategies = new HashMap<>();
 
-    private String canonicalURIsFileName = null;
     private List<FileOutput> fileOutputs = new LinkedList<>();
     private Long maxOutputTriples = null;
     private boolean isProfilingOn = false;

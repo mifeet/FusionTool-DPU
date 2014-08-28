@@ -28,6 +28,13 @@ public class FileOutputImpl implements FileOutput {
         this.format = format;
     }
 
+    public FileOutputImpl(File path, EnumSerializationFormat format, URI dataContext, URI metadataContext) {
+        this.path = path;
+        this.format = format;
+        this.dataContext = dataContext;
+        this.metadataContext = metadataContext;
+    }
+
     @Override
     public File getPath() {
         return path; 

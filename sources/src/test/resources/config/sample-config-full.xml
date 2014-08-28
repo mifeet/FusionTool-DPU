@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config>
+  <Prefixes>
+      <Prefix id="rdf" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
+      <Prefix id="rdfs" namespace="http://www.w3.org/2000/01/rdf-schema#" />
+      <Prefix id="fb" namespace="http://rdf.freebase.com/ns/" />
+  </Prefixes>
+
+  <DataProcessing>
+    <Param name="localCopyProcessing" value="true" />
+    <Param name="processResourcesWithClass" value="http://schema.org/PostalAddress" />
+
+    <SeedResourceSparqlQuery>SELECT ?s WHERE { ?s ?p ?o }</SeedResourceSparqlQuery> <!-- TODO: deprecated -->
+  </DataProcessing>
+
+    <ConflictResolution>
+        <DefaultStrategy function="ALL" cardinality="MANYVALUED" aggregationErrorStrategy="RETURN_ALL" />
+        <ResolutionStrategy function="AVG" cardinality="SINGLEVALUED" dependsOn="fb:location.geocode.latitude">
+            <Property id="fb:location.geocode.longitude"/>
+            <Property id="http://rdf.freebase.com/ns/location.geocode.latitude" />
+        </ResolutionStrategy>
+        <ResolutionStrategy function="BEST">
+            <Property id="rdfs:label"/>
+            <Param name="name" value="value"/>
+        </ResolutionStrategy>
+    </ConflictResolution>
+
+  <FileOutputs maxResolvedQuads="999">
+  	<FileOutput
+	  path="output/out.n3" 
+	  format="ntriples" 
+	  dataContext="http://example.com/result" 
+	  metadataContext="http://example.com/metadata" />
+  </FileOutputs>
+</Config>
