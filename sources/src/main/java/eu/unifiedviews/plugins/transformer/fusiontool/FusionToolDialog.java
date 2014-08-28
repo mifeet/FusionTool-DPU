@@ -14,8 +14,7 @@ import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputExc
  * configuration.
  * @author Jan Michelfeit
  */
-public class FusionToolDialog extends
-        BaseConfigDialog<FusionToolConfig> {
+public class FusionToolDialog extends BaseConfigDialog<FusionToolConfig> {
 
     private static final long serialVersionUID = 1L;
 
@@ -88,7 +87,7 @@ public class FusionToolDialog extends
         labelUpQuer.setValue("Configuration");
         mainLayout.addComponent(labelUpQuer, 0, 0);
 
-        // SPARQL Update Query textArea
+        // Configuration textArea
         configTextArea = new TextArea();
 
         configTextArea.addValidator(new com.vaadin.data.Validator() {

@@ -3,6 +3,8 @@ package eu.unifiedviews.plugins.transformer.fusiontool;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
 
+import java.io.Serializable;
+
 /**
  * Put your DPU's configuration here.
  * 
@@ -12,17 +14,10 @@ import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputExc
  * <b>This class must have default (parameter less) constructor!</b>
  * @author Jan Michelfeit
  */
-public class FusionToolConfig {
+public class FusionToolConfig implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String xmlConfig;
-
-    /**
-     * Initializes a new instance with empty configuration.
-     */
-    public FusionToolConfig() {
-        xmlConfig = "";
-    }
 
     /**
      * Initializes a new instance with the given XML configuration.

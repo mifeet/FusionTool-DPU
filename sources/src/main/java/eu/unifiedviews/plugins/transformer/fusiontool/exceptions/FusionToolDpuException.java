@@ -45,7 +45,7 @@ public class FusionToolDpuException extends DPUException {
 
     /**
      * Return the error code of the error.
-     * @see cz.cuni.mff.odcleanstore.shared.util.ODCSErrorCodes
+     * @see eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes
      * @return error code or null
      */
     public Integer getErrorCode() {

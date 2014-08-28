@@ -1,13 +1,8 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
+import com.google.common.collect.ImmutableList;
+import cz.cuni.mff.odcleanstore.core.ODCSUtils;
+import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import eu.unifiedviews.dataunit.DataUnit;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
@@ -17,16 +12,24 @@ import eu.unifiedviews.dpu.DPUException;
 import eu.unifiedviews.helpers.dpu.config.AbstractConfigDialog;
 import eu.unifiedviews.helpers.dpu.config.ConfigDialogProvider;
 import eu.unifiedviews.helpers.dpu.config.ConfigurableBase;
-import org.simpleframework.xml.core.PersistenceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainerImpl;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.simpleframework.xml.core.PersistenceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Implementation of ODCS-FusionTool as an ODCleanStore DPU.
@@ -45,26 +48,26 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     @DataUnit.AsInput(name = "input", optional = false,
             description = "Input data to be processed by data fusion (required)")
     public RDFDataUnit rdfInput;
-    
+
     /**
      * Second source of input data to be processed by data fusion.
      */
     @DataUnit.AsInput(name = "input2", optional = true,
             description = "Second source of input data to be processed by data fusion (optional)")
     public RDFDataUnit rdfInput2;
-    
+
     /**
      * owl:sameAs links to be used during conflict resolution.
      */
     @DataUnit.AsInput(name = "sameAs", optional = true,
-        description = "owl:sameAs links to be used during conflict resolution (optional)")
+            description = "owl:sameAs links to be used during conflict resolution (optional)")
     public RDFDataUnit sameAsInput;
-    
+
     /**
      * Metadata used during conflict resolution.
      */
     @DataUnit.AsInput(name = "metadata", optional = true,
-        description = "Metadata used during conflict resolution (optional)")
+            description = "Metadata used during conflict resolution (optional)")
     public RDFDataUnit metadataInput;
 
     /**
@@ -89,10 +92,13 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
 
     @Override
     public void execute(DPUContext context) throws DPUException {
+        setLogLevel(context.isDebugging());
+
         // Read config
-        ConfigContainer configContainer = null;
+        ConfigContainer configContainer;
         try {
             configContainer = ConfigReader.parseConfigXml(this.config.getXmlConfig());
+            ((ConfigContainerImpl) configContainer).setProfilingOn(context.isDebugging());
             checkValidInput(configContainer);
         } catch (InvalidInputException e) {
             LOG.error("Error in XML configuration:\n  {}", e.getMessage());
@@ -101,24 +107,21 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
             }
             throw new DPUException("Error in XML configuration", e);
         }
-        
-        ((ConfigContainerImpl) configContainer).setProfilingOn(context.isDebugging());
-        
+
         // Start time measurement
         long startTime = System.currentTimeMillis();
         LOG.info("Starting data fusion, this may take a while...");
+
         try {
-            List<RDFDataUnit> rdfInputs = new ArrayList<RDFDataUnit>();
-            rdfInputs.add(rdfInput);
-            rdfInputs.add(rdfInput2);
-            
+            List<RDFDataUnit> rdfInputs = ImmutableList.of(rdfInput, rdfInput2);
+
             // Execute data fusion
             FusionToolDpuExecutor executor = new FusionToolDpuExecutor(
-                    configContainer, 
-                    context, 
+                    configContainer,
+                    context,
                     rdfInputs,
                     sameAsInput,
-                    metadataInput, 
+                    metadataInput,
                     rdfOutput);
             executor.runFusionTool();
         } catch (FusionToolDpuException e) {
@@ -145,9 +148,8 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
                 throw new InvalidInputException("Invalid namespace prefix definition for URI '" + prefixEntry.getValue() + "'");
             }
         }
-        // intentionally do not check canonical URI files
     }
-    
+
     private static String formatRunTime(long runTime) {
         final long hourMs = ODCSUtils.MILLISECONDS * ODCSUtils.TIME_UNIT_60 * ODCSUtils.TIME_UNIT_60;
         DateFormat timeFormat = new SimpleDateFormat("mm:ss.SSS");
@@ -155,5 +157,11 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         return String.format("%d:%s",
                 runTime / hourMs,
                 timeFormat.format(new Date(runTime)));
+    }
+
+    private static void setLogLevel(boolean isDebugging) {
+        Level logLevel = isDebugging ? Level.DEBUG : Level.INFO;
+        LogManager.getLogger(FusionToolDpu.class.getPackage().getName()).setLevel(logLevel);
+        LogManager.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName()).setLevel(logLevel);
     }
 }
