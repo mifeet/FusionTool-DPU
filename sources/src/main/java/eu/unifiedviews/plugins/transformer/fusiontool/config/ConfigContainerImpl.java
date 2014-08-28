@@ -24,7 +24,6 @@ public class ConfigContainerImpl implements ConfigContainer {
 
     private String canonicalURIsFileName = null;
     private List<FileOutput> fileOutputs = new LinkedList<>();
-    private boolean enableFileCache = false;
     private Long maxOutputTriples = null;
     private boolean isProfilingOn = false;
     private boolean isLocalCopyProcessing = true;
@@ -119,15 +118,7 @@ public class ConfigContainerImpl implements ConfigContainer {
 
     @Override
     public String getCanonicalURIsFileName() {
-        return canonicalURIsFileName;
-    }
-
-    /**
-     * Setter for value {@link #getCanonicalURIsFileName()}.
-     * @param fileName name of file with canonical URIs
-     */
-    public void setCanonicalURIsFileName(String fileName) {
-        this.canonicalURIsFileName = fileName;
+        return FTConfigConstants.CANONICAL_URI_FILE_NAME;
     }
 
     @Override
@@ -146,15 +137,7 @@ public class ConfigContainerImpl implements ConfigContainer {
 
     @Override
     public boolean getEnableFileCache() {
-        return enableFileCache;
-    }
-
-    /**
-     * Sets value for {@link #getEnableFileCache()}.
-     * @param enableFileCache see {@link #getEnableFileCache()}
-     */
-    public void setEnableFileCache(boolean enableFileCache) {
-        this.enableFileCache = enableFileCache;
+        return FTConfigConstants.ENABLE_FILE_CACHE;
     }
 
     @Override

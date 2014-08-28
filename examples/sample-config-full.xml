@@ -2,14 +2,16 @@
 <Config>
   <!-- Definition of data processing settings; (optional) -->
   <DataProcessing>
-    <!-- If set to true, enables file cache for objects needed by the algorithm that may not fit in the memory;
-           disabling this option increases performance but may cause OutOfMemory errors; (optional, defaults to false) -->
-    <Param name="enableFileCache" value="false" />
-    
-    <!-- Name of file where canonical URIs are stored read from and written to;
-	       The file name must be a simple name and not contain any directory path; (optional) -->
-    <Param name="canonicalUrisFile" value="canonicalUris.txt" />
-      
+    <!-- If set to true, all data are downloaded to a local file prior to processing;
+         this is slower for smaller datasets but much faster for large data sets accessed via a SPARQL endpoint;
+         when set to true, <SeedResourceRestriction> will have no effect and all input triples will be processed;
+         (optional, defaults to true) -->
+    <Param name="localCopyProcessing" value="true" />
+
+    <!-- If not empty, only resources of the given (RDFS/OWL) class will be processed;
+         if omitted or empty, all resources in input data will be processed -->
+      <Param name="processResourcesWithClass" value="http://schema.org/PostalAddress" />
+
     <!-- SPARQL SELECT query which selects seed resources for transitive traversal of triples;
          the output will include triples having matching resources as their subjects and
          triples transitively reachable from there;
@@ -17,8 +19,8 @@
          optional (if not given, all triples from source graphs are processed) -->
     <SeedResourceSparqlQuery>
       SELECT ?s WHERE { ?s ?p ?o } 
-    </SeedResourceSparqlQuery>
-  </DataProcessing>      
+    </SeedResourceSparqlQuery> <!-- TODO: deprecated -->
+  </DataProcessing>
   
   <!-- Definition of conflict resolution settings (optional) -->
   <ConflictResolution>
