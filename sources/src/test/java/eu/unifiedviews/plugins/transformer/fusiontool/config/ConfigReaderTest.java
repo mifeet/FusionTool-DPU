@@ -19,10 +19,7 @@ import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class ConfigReaderTest {
@@ -88,7 +85,7 @@ public class ConfigReaderTest {
         assertThat(config.getPrefixes(), equalTo(expectedPrefixes));
 
         FileOutput fileOutput = Iterables.getOnlyElement(config.getFileOutputs());
-        assertThat(fileOutput.getPath(), is(new File("output\\out.n3")));
+        assertThat(fileOutput.getPath(), is(new File("output", "out.n3")));
         assertThat(fileOutput.getFormat(), is(EnumSerializationFormat.N3));
         assertThat(fileOutput.getDataContext(), is((URI) new URIImpl("http://example.com/result")));
         assertThat(fileOutput.getMetadataContext(), is((URI) new URIImpl("http://example.com/metadata")));
