@@ -12,6 +12,9 @@ public final class FusionToolDpuErrorCodes {
     }
 
     // CHECKSTYLE:OFF
+
+    public static final int FUSION_TOOL_IO_ERROR = 15;
+    public static final int FUSION_TOOL_EXECUTION_ERROR = 14;
     public static final int METADATA_LOADING_ERROR = 13;
     public static final int REPOSITORY_ERROR = 12;
     public static final int FILE_OUTPUT_DIRECTORY = 11;

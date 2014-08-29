@@ -1,10 +1,10 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.util;
 
+import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.AlternativeUriNavigator;
+import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.UriMappingIterableImpl;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils;
 import eu.unifiedviews.plugins.transformer.fusiontool.testutils.MockIteration;
-import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.AlternativeURINavigator;
-import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.URIMappingIterableImpl;
 import org.junit.Test;
 import org.openrdf.model.Statement;
 import org.openrdf.model.ValueFactory;
@@ -38,7 +38,7 @@ public class QuadLoaderTest {
         when(rdfDataUnit.getConnection()).thenReturn(repository.getConnection());
 
         QuadLoader quadLoader = new QuadLoader(Collections.singletonList(rdfDataUnit),
-                new AlternativeURINavigator(new URIMappingIterableImpl()),
+                new AlternativeUriNavigator(new UriMappingIterableImpl()),
                 new PrefixDeclBuilderImpl(Collections.<String, String>emptyMap()));
 
         // Act
@@ -62,10 +62,10 @@ public class QuadLoaderTest {
         when(rdfDataUnit.getIteration()).thenReturn(new MockIteration("http://graph"));
         when(rdfDataUnit.getConnection()).thenReturn(repository.getConnection());
 
-        URIMappingIterableImpl uriMapping = new URIMappingIterableImpl();
+        UriMappingIterableImpl uriMapping = new UriMappingIterableImpl();
         uriMapping.addLink(FTDPUTestUtils.createHttpUri("abc").stringValue(), FTDPUTestUtils.createHttpUri("abc_sa").stringValue());
         QuadLoader quadLoader = new QuadLoader(Collections.singletonList(rdfDataUnit),
-                new AlternativeURINavigator(uriMapping),
+                new AlternativeUriNavigator(uriMapping),
                 new PrefixDeclBuilderImpl(Collections.<String, String>emptyMap()));
 
         // Act

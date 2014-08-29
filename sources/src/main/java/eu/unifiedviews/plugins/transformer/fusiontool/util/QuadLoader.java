@@ -1,12 +1,12 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.util;
 
+import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.AlternativeUriNavigator;
 import cz.cuni.mff.odcleanstore.shared.util.LimitedURIListBuilder;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.FTConfigConstants;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
-import eu.unifiedviews.plugins.transformer.fusiontool.urimapping.AlternativeURINavigator;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
@@ -79,7 +79,7 @@ public class QuadLoader {
     private static final String OBJECT_VAR = "o";
     private static final String GRAPH_VAR = "g";
 
-    private final AlternativeURINavigator alternativeURINavigator;
+    private final AlternativeUriNavigator alternativeURINavigator;
     private final List<RDFDataUnit> rdfDataUnits;
     private final PrefixDeclBuilder nsPrefixes;
 
@@ -90,7 +90,7 @@ public class QuadLoader {
      * @param nsPrefixes holder for namespace prefixes
      */
     public QuadLoader(
-            List<RDFDataUnit> rdfDataUnits, AlternativeURINavigator alternativeURINavigator, PrefixDeclBuilder nsPrefixes) {
+            List<RDFDataUnit> rdfDataUnits, AlternativeUriNavigator alternativeURINavigator, PrefixDeclBuilder nsPrefixes) {
         
         this.rdfDataUnits = rdfDataUnits;
         this.alternativeURINavigator = alternativeURINavigator;
@@ -110,7 +110,7 @@ public class QuadLoader {
         }
 
         uri = uri.trim();
-        List<String> alternativeURIs = alternativeURINavigator.listAlternativeURIs(uri);
+        List<String> alternativeURIs = alternativeURINavigator.listAlternativeUris(uri);
         Collection<Statement> result = new ArrayList<Statement>();
 
         try {
