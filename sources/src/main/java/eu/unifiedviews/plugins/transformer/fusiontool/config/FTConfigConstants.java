@@ -4,6 +4,7 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.config;
 
 import cz.cuni.mff.odcleanstore.fusiontool.config.LDFTConfigConstants;
+import cz.cuni.mff.odcleanstore.fusiontool.util.ODCSFusionToolAppUtils;
 import org.openrdf.model.URI;
 import org.openrdf.rio.ParserConfig;
 
@@ -63,9 +64,11 @@ public final class FTConfigConstants {
     public static final ParserConfig DEFAULT_FILE_PARSER_CONFIG = LDFTConfigConstants.DEFAULT_FILE_PARSER_CONFIG;
 
     public static final int DEFAULT_QUERY_TIMEOUT = LDFTConfigConstants.DEFAULT_QUERY_TIMEOUT;
+
     public static final float MAX_FREE_MEMORY_USAGE = LDFTConfigConstants.MAX_FREE_MEMORY_USAGE;
     public static final Set<URI> SAME_AS_LINK_TYPES = LDFTConfigConstants.SAME_AS_LINK_TYPES;
     public static final String CANONICAL_URI_FILE_NAME = "fusion-canonical-uris.txt";
     public static final boolean ENABLE_FILE_CACHE = false;
+    public static final long MAX_MEMORY_LIMIT = 3 * ODCSFusionToolAppUtils.GB_BYTES;
 
 }
