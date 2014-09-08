@@ -24,13 +24,4 @@ public interface ConfigContainer extends ConfigData, ConfigProcessing, ConfigQua
      * @return list of result data file outputs
      */
     List<FileOutput> getFileOutputs();
-    
-    /**
-     * SPARQL query returning URI resources which are initially loaded and processed.
-     * The query must be a SELECT query binding a single variable in the result set.
-     * If given, triples having matching resources and triples reachable from them are processed. All data
-     * from matching input graphs are processed otherwise.
-     * @return SPARQL query or null  
-     */
-    String getSeedResourceSparqlQuery();
 }

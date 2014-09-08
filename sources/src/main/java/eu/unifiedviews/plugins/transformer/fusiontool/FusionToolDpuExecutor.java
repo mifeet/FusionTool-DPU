@@ -133,7 +133,7 @@ public class FusionToolDpuExecutor {
 
             // Get iterator over subjects of relevant triples
             UriQueue queuedSubjects = getSeedSubjects(uriMapping, collectionFactory);
-            final boolean isTransitive = config.getSeedResourceSparqlQuery() != null;
+            final boolean isTransitive = false;
 
             // Initialize CR
             ConflictResolver conflictResolver = createConflictResolver(uriMapping);
@@ -312,9 +312,7 @@ public class FusionToolDpuExecutor {
             throws FusionToolDpuException {
 
         UriQueueImpl seedSubjects = new UriQueueImpl(collectionFactory);
-        String query = (config.getSeedResourceSparqlQuery() != null)
-                ? config.getSeedResourceSparqlQuery()
-                : "SELECT DISTINCT ?s WHERE {?s ?p ?o}";
+        String query = "SELECT DISTINCT ?s WHERE {?s ?p ?o}";
         TupleQueryResult queryResult = null;
         try {
             for (RDFDataUnit rdfInput : rdfInputs) {

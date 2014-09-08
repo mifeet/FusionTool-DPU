@@ -73,7 +73,6 @@ public final class ConfigReader {
 
         // Data processing settings
         if (configXml.getDataProcessing() != null) {
-            config.setSeedResourceSparqlQuery(configXml.getDataProcessing().getSeedResourceSparqlQuery());
             List<ParamXml> params = configXml.getDataProcessing().getParams();
             if (params != null) {
                 extractDataProcessingParams(params, config, prefixExpander);
@@ -189,8 +188,6 @@ public final class ConfigReader {
             } else if (ConfigParameters.PROCESSING_MAX_OUTPUT_TRIPLES.equalsIgnoreCase(param.getName())) {
                 long value = convertToLong(param.getValue(), "Value of " + ConfigParameters.PROCESSING_MAX_OUTPUT_TRIPLES + " is not a valid number");
                 config.setMaxOutputTriples(value);
-            } else if (ConfigParameters.PROCESSING_LOCAL_COPY_PROCESSING.equalsIgnoreCase(param.getName()) && !ODCSUtils.isNullOrEmpty(param.getValue())) {
-                config.setLocalCopyProcessing(Boolean.parseBoolean(param.getValue()));
             } else if (ConfigParameters.PROCESSING_ONLY_RESOURCES_WITH_CLASS.equalsIgnoreCase(param.getName())) {
                 if (!ODCSUtils.isNullOrEmpty(param.getValue())) {
                     URI classUri = convertToUriWithExpansion(prefixExpander, param.getValue());

@@ -20,15 +20,7 @@ public class DataProcessingXml {
     @ElementList(name = "Params", required = false, empty = false, inline = true)
     private List<ParamXml> params;
     
-    @Element(name = "SeedResourceSparqlQuery", required = false)
-    private String seedResourceSparqlQuery;
-    
     public List<ParamXml> getParams() {
         return params;
     }
-
-    public String getSeedResourceSparqlQuery() {
-        return seedResourceSparqlQuery;
-    }
-
 }

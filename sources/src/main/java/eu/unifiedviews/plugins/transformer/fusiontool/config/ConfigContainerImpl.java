@@ -25,25 +25,9 @@ public class ConfigContainerImpl implements ConfigContainer {
     private List<FileOutput> fileOutputs = new LinkedList<>();
     private Long maxOutputTriples = null;
     private boolean isProfilingOn = false;
-    private boolean isLocalCopyProcessing = true;
     private Long memoryLimit = null;
     private URI requiredClassOfProcessedResources = null;
     private ParserConfig parserConfig = FTConfigConstants.DEFAULT_FILE_PARSER_CONFIG;
-
-    private String seedResourceSparqlQuery;
-
-    @Override
-    public String getSeedResourceSparqlQuery() {
-        return seedResourceSparqlQuery;
-    }
-
-    /**
-     * Sets value for {@link #getSeedResourceSparqlQuery()}.
-     * @param seedResourceSparqlQuery SPARQL query returning result set with a single bound variable
-     */
-    public void setSeedResourceSparqlQuery(String seedResourceSparqlQuery) {
-        this.seedResourceSparqlQuery = seedResourceSparqlQuery;
-    }
 
     @Override
     public String getResultDataURIPrefix() { // TODO: settable in XML configuration
@@ -141,15 +125,7 @@ public class ConfigContainerImpl implements ConfigContainer {
 
     @Override
     public boolean isLocalCopyProcessing() {
-        return isLocalCopyProcessing;
-    }
-
-    /**
-     * Sets value for {@link #isLocalCopyProcessing()}.
-     * @param isLocalCopyProcessing see {@link #isLocalCopyProcessing()}
-     */
-    public void setLocalCopyProcessing(boolean isLocalCopyProcessing) {
-        this.isLocalCopyProcessing = isLocalCopyProcessing;
+        return true;
     }
 
     @Override
@@ -162,6 +138,7 @@ public class ConfigContainerImpl implements ConfigContainer {
      * @param memoryLimit see {@link #getMemoryLimit()}
      */
     public void setMemoryLimit(Long memoryLimit) {
+        // FIXME: load from configuration
         this.memoryLimit = memoryLimit;
     }
 
