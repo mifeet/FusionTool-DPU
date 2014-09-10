@@ -7,10 +7,7 @@
   </Prefixes>
 
   <DataProcessing>
-    <Param name="localCopyProcessing" value="true" />
     <Param name="processResourcesWithClass" value="http://schema.org/PostalAddress" />
-
-    <SeedResourceSparqlQuery>SELECT ?s WHERE { ?s ?p ?o }</SeedResourceSparqlQuery> <!-- TODO: deprecated -->
   </DataProcessing>
 
     <ConflictResolution>
