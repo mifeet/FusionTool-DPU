@@ -9,7 +9,6 @@ import cz.cuni.mff.odcleanstore.conflictresolution.quality.impl.DecidingConflict
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.impl.ODCSSourceQualityCalculator;
 import cz.cuni.mff.odcleanstore.fusiontool.AbstractFusionToolRunner;
 import cz.cuni.mff.odcleanstore.fusiontool.ODCSFusionToolExecutor;
-import cz.cuni.mff.odcleanstore.fusiontool.config.LDFTConfigConstants;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.impl.NestedResourceDescriptionQualityCalculatorImpl;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.impl.ResourceDescriptionConflictResolverImpl;
@@ -34,15 +33,11 @@ import eu.unifiedviews.dpu.DPUContext;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.FTConfigConstants;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.AllTriplesDataUnitLoader;
+import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitSameAsLinkLoader;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory;
-import org.openrdf.OpenRDFException;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
 import org.openrdf.model.impl.TreeModel;
-import org.openrdf.query.GraphQueryResult;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.slf4j.Logger;
@@ -177,49 +172,12 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
                 config.getPreferredCanonicalURIs());
 
         UriMappingIterableImpl uriMapping = new UriMappingIterableImpl(preferredURIs);
-
-        return loadSameAsLinks(sameAsInput, uriMapping, config.getSameAsLinkTypes());
+        DataUnitSameAsLinkLoader sameAsLoader = new DataUnitSameAsLinkLoader(sameAsInput, config.getSameAsLinkTypes());
+        sameAsLoader.loadSameAsLinks(uriMapping);
+        return uriMapping;
     }
 
     // TODO: KONEC
-
-    private static UriMappingIterable loadSameAsLinks(
-            RDFDataUnit sameAsInput,
-            UriMappingIterableImpl uriMapping, Set<URI> sameAsLinkTypes) throws ODCSFusionToolException {
-
-        // TODO: extract to class
-
-        LOG.info("Loading sameAs links...");
-        RepositoryConnection connection = null;
-        try {
-            connection = sameAsInput.getConnection();
-            long startTime = System.currentTimeMillis();
-            long loadedCount = 0;
-            for (URI link : sameAsLinkTypes) {
-                String query = String.format("CONSTRUCT {?s <%1$s> ?o} WHERE {?s <%1$s> ?o}", link.stringValue());
-                GraphQueryResult sameAsTriples = connection.prepareGraphQuery(QueryLanguage.SPARQL, query).evaluate();
-                while (sameAsTriples.hasNext()) {
-                    uriMapping.addLink(sameAsTriples.next());
-                    loadedCount++;
-                    if (loadedCount % LDFTConfigConstants.LOG_LOOP_SIZE == 0) {
-                        LOG.info("... loaded {} sameAs links", loadedCount);
-                    }
-                }
-            }
-            LOG.info(String.format("Loaded & resolved %,d sameAs links in %,d ms", loadedCount, System.currentTimeMillis() - startTime));
-        } catch (OpenRDFException | DataUnitException e) {
-            throw new ODCSFusionToolException("Error when loading owl:sameAs links from input", e);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (RepositoryException e) {
-                    LOG.error("Error closing sameAs data unit connection", e);
-                }
-            }
-        }
-        return uriMapping;
-    }
 
     @Override
     protected CloseableRDFWriter createRDFWriter() throws IOException, ODCSFusionToolException {
