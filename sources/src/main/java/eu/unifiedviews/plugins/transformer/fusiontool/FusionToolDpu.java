@@ -1,8 +1,10 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
 import com.google.common.collect.ImmutableList;
+import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
+import cz.cuni.mff.odcleanstore.fusiontool.exceptions.ODCSFusionToolException;
 import eu.unifiedviews.dataunit.DataUnit;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
@@ -15,6 +17,7 @@ import eu.unifiedviews.helpers.dpu.config.ConfigurableBase;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainerImpl;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
+import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
 import org.apache.log4j.Level;
@@ -23,9 +26,9 @@ import org.simpleframework.xml.core.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -116,20 +119,17 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
             List<RDFDataUnit> rdfInputs = ImmutableList.of(rdfInput, rdfInput2);
 
             // Execute data fusion
-            FusionToolDpuExecutor executor = new FusionToolDpuExecutor(
+            FusionToolDpuRunner runner = new FusionToolDpuRunner(
                     configContainer,
                     context,
                     rdfInputs,
                     sameAsInput,
                     metadataInput,
                     rdfOutput);
-            executor.runFusionTool();
-        } catch (FusionToolDpuException e) {
-            LOG.error(e.getMessage());
-            if (e.getCause() != null) {
-                LOG.error("  " + e.getCause().getMessage());
-            }
-            throw e;
+            runner.runFusionTool();
+        } catch (ConflictResolutionException | IOException | ODCSFusionToolException e) {
+            logException(e);
+            throw new FusionToolDpuException(FusionToolDpuErrorCodes.FUSION_TOOL_EXECUTION_ERROR, e);
         }
 
         LOG.info("Fusion Tool DPU executed in {}", formatRunTime(System.currentTimeMillis() - startTime));
@@ -163,5 +163,12 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         Level logLevel = isDebugging ? Level.DEBUG : Level.INFO;
         LogManager.getLogger(FusionToolDpu.class.getPackage().getName()).setLevel(logLevel);
         LogManager.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName()).setLevel(logLevel);
+    }
+
+    private static void logException(Exception e) {
+        LOG.error(e.getMessage());
+        if (e.getCause() != null) {
+            LOG.error("  " + e.getCause().getMessage());
+        }
     }
 }
