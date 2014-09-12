@@ -14,10 +14,8 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.sail.memory.MemoryStore;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -41,7 +39,7 @@ public class AllTriplesDataUnitLoaderTest {
                 createHttpStatement("s4", "p", "o", "g4"),
                 createHttpStatement("s5", "p", "o", "g5")
         );
-        Repository repository = createRepository(statements);
+        Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
         Collection<Statement> result = new HashSet<>();
@@ -66,7 +64,7 @@ public class AllTriplesDataUnitLoaderTest {
                 createHttpStatement("s3", "p", "o", "g3"),
                 createHttpStatement("s4", "p", "o", "g4")
         );
-        Repository repository = createRepository(statements);
+        Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
         Collection<Statement> result = new HashSet<>();
@@ -93,7 +91,7 @@ public class AllTriplesDataUnitLoaderTest {
                 createHttpStatement("s3", "p", "o", "g3"),
                 createHttpStatement("s4", "p", "o", "g4")
         );
-        Repository repository = createRepository(statements);
+        Repository repository = FTDPUTestUtils.createRepository(statements);
         AllTriplesDataUnitLoader loader = createLoader(repository, 2);
 
         // Add extra statements after loader is created and graphs configured
@@ -118,7 +116,7 @@ public class AllTriplesDataUnitLoaderTest {
     public void returnsEmptyResultWhenNoMatchingTriplesExist() throws Exception {
         // Arrange
         Collection<Statement> statements = ImmutableList.of();
-        Repository repository = createRepository(statements);
+        Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
         Collection<Statement> result = new HashSet<>();
@@ -141,7 +139,7 @@ public class AllTriplesDataUnitLoaderTest {
         Collection<Statement> statements = ImmutableList.of(
                 createHttpStatement("s1", "p", "o", "g1")
         );
-        Repository repository = createRepository(statements);
+        Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
         AllTriplesDataUnitLoader loader = createLoader(repository, 2);
@@ -163,7 +161,7 @@ public class AllTriplesDataUnitLoaderTest {
         Collection<Statement> statements = ImmutableList.of(
                 createHttpStatement("s1", "p", "o", "g1")
         );
-        Repository repository = createRepository(statements);
+        Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
         AllTriplesDataUnitLoader loader = createLoader(repository, 2);
@@ -177,15 +175,6 @@ public class AllTriplesDataUnitLoaderTest {
 
         // Assert
         assertTrue(ODCSUtils.isValidIRI(defaultContext.stringValue()));
-    }
-
-    private Repository createRepository(Collection<Statement> statements) throws RepositoryException {
-        Repository repository = new SailRepository(new MemoryStore());
-        repository.initialize();
-        RepositoryConnection connection = repository.getConnection();
-        connection.add(statements);
-        connection.close();
-        return repository;
     }
 
     private AllTriplesDataUnitLoader createLoader(Repository repository, int maxSparqlResultsSize) throws RepositoryException, DataUnitException {
