@@ -24,4 +24,12 @@ public interface ConfigContainer extends ConfigData, ConfigProcessing, ConfigQua
      * @return list of result data file outputs
      */
     List<FileOutput> getFileOutputs();
+
+    /**
+     * True iff the output should contain metadata (quality and source graphs of resolved triples).
+     * Note that when metadata are enabled, each resolved triple will be placed to its own named graph.
+     * If metadata are disabled, all resolved triples will be placed in the default graph of output data unit.
+     * @return true if the output should contain metadata, false if no metadata are written to the output.
+     */
+    boolean getWriteMetadata();
 }

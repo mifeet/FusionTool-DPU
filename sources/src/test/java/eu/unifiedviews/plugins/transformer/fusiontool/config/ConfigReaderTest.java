@@ -66,6 +66,7 @@ public class ConfigReaderTest {
         assertThat(config.getCanonicalURIsFileName(), is(FTConfigConstants.CANONICAL_URI_FILE_NAME));
         assertThat(config.getFileOutputs(), is(Collections.<FileOutput>emptyList()));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
+        assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
     }
 
     @Test
@@ -124,6 +125,7 @@ public class ConfigReaderTest {
 
         assertThat(config.getCanonicalURIsFileName(), is(FTConfigConstants.CANONICAL_URI_FILE_NAME));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
+        assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
     }
 
     @Test(expected = InvalidInputException.class)

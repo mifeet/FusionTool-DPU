@@ -5,12 +5,7 @@ import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolutionStrategyImpl;
 import org.openrdf.model.URI;
 import org.openrdf.rio.ParserConfig;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Container of configuration values.
@@ -138,7 +133,6 @@ public class ConfigContainerImpl implements ConfigContainer {
      * @param memoryLimit see {@link #getMemoryLimit()}
      */
     public void setMemoryLimit(Long memoryLimit) {
-        // FIXME: load from configuration
         this.memoryLimit = memoryLimit;
     }
 
@@ -155,6 +149,11 @@ public class ConfigContainerImpl implements ConfigContainer {
     @Override
     public List<FileOutput> getFileOutputs() {
         return fileOutputs;
+    }
+
+    @Override
+    public boolean getWriteMetadata() {
+        return FTConfigConstants.WRITE_METADATA;
     }
 
     /**

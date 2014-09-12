@@ -6,6 +6,16 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.RepositoryResult;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.memory.MemoryStore;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Utility methods for JUnit tests.
@@ -134,5 +144,28 @@ public final class FTDPUTestUtils {
                 statement.getPredicate(),
                 statement.getObject(),
                 statement.getContext());
+    }
+
+    public static Repository createRepository(Collection<Statement> statements) throws RepositoryException {
+        Repository repository = new SailRepository(new MemoryStore());
+        repository.initialize();
+        RepositoryConnection connection = repository.getConnection();
+        connection.add(statements);
+        connection.close();
+        return repository;
+    }
+
+    public static List<Statement> getAllStatements(Repository repository) throws RepositoryException {
+        RepositoryConnection connection = repository.getConnection();
+        try {
+            List<Statement> result = new ArrayList<>();
+            RepositoryResult<Statement> repositoryResult = connection.getStatements(null, null, null, false);
+            while (repositoryResult.hasNext()) {
+                result.add(repositoryResult.next());
+            }
+            return result;
+        } finally {
+            connection.close();
+        }
     }
 }
