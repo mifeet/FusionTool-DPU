@@ -33,6 +33,8 @@ import eu.unifiedviews.dpu.DPUContext;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.FTConfigConstants;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.AllTriplesDataUnitLoader;
+import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriter;
+import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriterWithMetadata;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitSameAsLinkLoader;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory;
 import org.openrdf.model.Model;
@@ -45,11 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Fuses RDF data from input using ODCS Conflict Resolution and writes the output to RDF outputs.
@@ -177,12 +175,15 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
         return uriMapping;
     }
 
-    // TODO: KONEC
-
     @Override
     protected CloseableRDFWriter createRDFWriter() throws IOException, ODCSFusionToolException {
-        return null;
-        // FIXME
+        try {
+            return config.getWriteMetadata()
+                    ? new DataUnitRDFWriterWithMetadata(rdfOutput)
+                    : new DataUnitRDFWriter(rdfOutput);
+        } catch (DataUnitException e) {
+            throw new ODCSFusionToolException("Error creating output writer", e);
+        }
     }
 
     @Override
@@ -208,6 +209,10 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
         );
     }
 
+    @Override
+    protected void writeSameAsLinks(UriMappingIterable uriMapping) throws IOException, ODCSFusionToolException {
+        // Do nothing
+    }
 
     @Override
     protected void writeCanonicalURIs(UriMappingIterable uriMapping) throws IOException {
@@ -222,11 +227,6 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
 
     private File getCanonicalUrisFile() {
         return new File(executionContext.getResultDir(), config.getCanonicalURIsFileName());
-    }
-
-    @Override
-    protected void writeSameAsLinks(UriMappingIterable uriMapping) throws IOException, ODCSFusionToolException {
-        // Do nothing
     }
 
     private long calculateMemoryLimit() {
