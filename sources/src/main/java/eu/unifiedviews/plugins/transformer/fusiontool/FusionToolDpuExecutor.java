@@ -1,25 +1,15 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
-import cz.cuni.mff.odcleanstore.conflictresolution.ConflictResolver;
-import cz.cuni.mff.odcleanstore.conflictresolution.ConflictResolverFactory;
-import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionFunctionRegistry;
-import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
-import cz.cuni.mff.odcleanstore.conflictresolution.URIMapping;
+import cz.cuni.mff.odcleanstore.conflictresolution.*;
 import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.DistanceMeasureImpl;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.DummySourceQualityCalculator;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
-import cz.cuni.mff.odcleanstore.fusiontool.AbstractFusionToolRunner;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.AlternativeUriNavigator;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.UriMappingIterable;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.UriMappingIterableImpl;
-import cz.cuni.mff.odcleanstore.fusiontool.loaders.InputLoader;
-import cz.cuni.mff.odcleanstore.fusiontool.util.CanonicalUriFileReader;
-import cz.cuni.mff.odcleanstore.fusiontool.util.EnumFusionCounters;
+import cz.cuni.mff.odcleanstore.fusiontool.util.CanonicalUriFileHelper;
 import cz.cuni.mff.odcleanstore.fusiontool.util.MemoryProfiler;
-import cz.cuni.mff.odcleanstore.fusiontool.util.ODCSFusionToolAppUtils;
-import cz.cuni.mff.odcleanstore.fusiontool.util.ProfilingTimeCounter;
-import cz.cuni.mff.odcleanstore.fusiontool.writers.CloseableRDFWriter;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
@@ -33,25 +23,12 @@ import eu.unifiedviews.plugins.transformer.fusiontool.io.MapdbCollectionFactory;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.MemoryCollectionFactory;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriter;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory;
-import eu.unifiedviews.plugins.transformer.fusiontool.util.PrefixDeclBuilder;
-import eu.unifiedviews.plugins.transformer.fusiontool.util.PrefixDeclBuilderImpl;
-import eu.unifiedviews.plugins.transformer.fusiontool.util.QuadLoader;
-import eu.unifiedviews.plugins.transformer.fusiontool.util.UriQueue;
-import eu.unifiedviews.plugins.transformer.fusiontool.util.UriQueueImpl;
+import eu.unifiedviews.plugins.transformer.fusiontool.util.*;
 import org.openrdf.OpenRDFException;
-import org.openrdf.model.BNode;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.openrdf.model.*;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.vocabulary.OWL;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.GraphQueryResult;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
@@ -60,12 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Fuses RDF data from input using ODCS Conflict Resolution and writes the output to RDF outputs.
@@ -73,6 +45,7 @@ import java.util.Set;
  * See sample configuration files (sample-config-full.xml) for overview of all processing options.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class FusionToolDpuExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuExecutor.class);
 
@@ -288,7 +261,7 @@ public class FusionToolDpuExecutor {
         preferredURIs.addAll(preferredCanonicalURIs);
 
         if (config.getCanonicalURIsFileName() != null) {
-            CanonicalUriFileReader canonicalUriReader = new CanonicalUriFileReader();
+            CanonicalUriFileHelper canonicalUriReader = new CanonicalUriFileHelper();
             try {
                 canonicalUriReader.readCanonicalUris(getCanonicalUrisFile(), preferredURIs);
             } catch (IOException e) {
@@ -458,7 +431,7 @@ public class FusionToolDpuExecutor {
      */
     protected void writeCanonicalURIs(Set<String> resolvedCanonicalURIs) throws FusionToolDpuException {
         if (config.getCanonicalURIsFileName() != null) {
-            CanonicalUriFileReader canonicalUriReader = new CanonicalUriFileReader();
+            CanonicalUriFileHelper canonicalUriReader = new CanonicalUriFileHelper();
             try {
                 canonicalUriReader.writeCanonicalUris(getCanonicalUrisFile(), resolvedCanonicalURIs);
             } catch (IOException e) {
