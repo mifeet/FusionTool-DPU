@@ -7,15 +7,16 @@ import cz.cuni.mff.odcleanstore.conflictresolution.impl.DistanceMeasureImpl;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.SourceQualityCalculator;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.impl.DecidingConflictFQualityCalculator;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.impl.ODCSSourceQualityCalculator;
-import cz.cuni.mff.odcleanstore.fusiontool.AbstractFusionToolRunner;
-import cz.cuni.mff.odcleanstore.fusiontool.ODCSFusionToolExecutor;
+import cz.cuni.mff.odcleanstore.fusiontool.FusionComponentFactory;
+import cz.cuni.mff.odcleanstore.fusiontool.FusionExecutor;
+import cz.cuni.mff.odcleanstore.fusiontool.LDFusionToolExecutor;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.impl.NestedResourceDescriptionQualityCalculatorImpl;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.impl.ResourceDescriptionConflictResolverImpl;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.AlternativeUriNavigator;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.UriMappingIterable;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.UriMappingIterableImpl;
-import cz.cuni.mff.odcleanstore.fusiontool.exceptions.ODCSFusionToolException;
+import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.ExternalSortingInputLoader;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.InputLoader;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.data.AllTriplesLoader;
@@ -23,7 +24,8 @@ import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.FederatedResourceDescri
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.MappedResourceFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.RequiredClassFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.ResourceDescriptionFilter;
-import cz.cuni.mff.odcleanstore.fusiontool.util.ODCSFusionToolAppUtils;
+import cz.cuni.mff.odcleanstore.fusiontool.util.*;
+import cz.cuni.mff.odcleanstore.fusiontool.writers.CanonicalUriFileWriter;
 import cz.cuni.mff.odcleanstore.fusiontool.writers.CloseableRDFWriter;
 import cz.cuni.mff.odcleanstore.vocabulary.ODCSInternal;
 import eu.unifiedviews.dataunit.DataUnitException;
@@ -39,6 +41,7 @@ import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitSameAsLinkLoade
 import eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
@@ -55,8 +58,8 @@ import java.util.*;
  * See sample configuration files (sample-config-full.xml) for overview of all processing options.
  * @author Jan Michelfeit
  */
-public class FusionToolDpuRunner extends AbstractFusionToolRunner {
-    private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuExecutor.class);
+public class FusionToolDpuComponentFactory implements FusionComponentFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuComponentFactory.class);
 
     /** An instance of {@link eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory}. */
     protected static final FileOutputWriterFactory RDF_WRITER_FACTORY = new FileOutputWriterFactory();
@@ -67,8 +70,8 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
     private RDFDataUnit sameAsInput;
     private RDFDataUnit metadataInput;
     private WritableRDFDataUnit rdfOutput;
-    private boolean hasFusionToolRan;
-    private int fileOutputWrittenQuads;
+    private ProfilingTimeCounter<EnumFusionCounters> executorTimeProfiler;
+    private MemoryProfiler executorMemoryProfiler;
 
     /**
      * Creates a new instance.
@@ -79,31 +82,32 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
      * @param metadataInput input metadata
      * @param rdfOutput RDF output data
      */
-    public FusionToolDpuRunner(
+    public FusionToolDpuComponentFactory(
             ConfigContainer config, DPUContext executionContext, List<RDFDataUnit> rdfInputs,
             RDFDataUnit sameAsInput, RDFDataUnit metadataInput, WritableRDFDataUnit rdfOutput) {
-        super(config.isProfilingOn());
         this.config = config;
         this.executionContext = executionContext;
         this.rdfInputs = rdfInputs;
         this.sameAsInput = sameAsInput;
         this.metadataInput = metadataInput;
         this.rdfOutput = rdfOutput;
-        this.hasFusionToolRan = false;
-        this.fileOutputWrittenQuads = 0;
+        this.executorTimeProfiler = ProfilingTimeCounter.createInstance(EnumFusionCounters.class, config.isProfilingOn());
+        this.executorMemoryProfiler = MemoryProfiler.createInstance(config.isProfilingOn());
     }
 
     @Override
-    protected ODCSFusionToolExecutor createExecutor(UriMappingIterable uriMapping) {
-        return new ODCSFusionToolExecutor(
+    public FusionExecutor getExecutor(UriMappingIterable uriMapping) {
+        return new LDFusionToolExecutor(
                 true,
                 config.getMaxOutputTriples(),
-                config.isProfilingOn(),
-                getInputFilter(uriMapping));
+                getInputFilter(uriMapping),
+                executorTimeProfiler,
+                executorMemoryProfiler
+        );
     }
 
     @Override
-    protected InputLoader getInputLoader() throws IOException, ODCSFusionToolException {
+    public InputLoader getInputLoader() throws IOException, LDFusionToolException {
         if (!config.isLocalCopyProcessing()) {
             throw new IllegalStateException("Non-local copy processing is not supported in DPU");
         }
@@ -111,7 +115,7 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
         Collection<AllTriplesLoader> allTriplesLoaders = getAllTriplesLoaders(rdfInputs);
         return new ExternalSortingInputLoader(
                 allTriplesLoaders,
-                ODCSFusionToolAppUtils.getResourceDescriptionProperties(config),
+                LDFusionToolUtils.getResourceDescriptionProperties(config),
                 executionContext.getWorkingDir(),
                 config.getParserConfig(),
                 memoryLimit);
@@ -129,7 +133,7 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
         return FederatedResourceDescriptionFilter.fromList(inputFilters);
     }
 
-    protected Collection<AllTriplesLoader> getAllTriplesLoaders(List<RDFDataUnit> rdfInputs) throws ODCSFusionToolException {
+    protected Collection<AllTriplesLoader> getAllTriplesLoaders(List<RDFDataUnit> rdfInputs) throws LDFusionToolException {
         List<AllTriplesLoader> loaders = new ArrayList<>(rdfInputs.size());
         for (RDFDataUnit rdfInput : rdfInputs) {
             try {
@@ -138,16 +142,16 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
             } catch (DataUnitException e) {
                 // clean up already initialized loaders
                 for (AllTriplesLoader loader : loaders) {
-                    ODCSFusionToolAppUtils.closeQuietly(loader);
+                    LDFusionToolUtils.closeQuietly(loader);
                 }
-                throw new ODCSFusionToolException("Error creating triple loader from RDF data unit: " + e.getMessage(), e);
+                throw new LDFusionToolException("Error creating triple loader from RDF data unit: " + e.getMessage(), e);
             }
         }
         return loaders;
     }
 
     @Override
-    protected Model getMetadata() throws ODCSFusionToolException {
+    public Model getMetadata() throws LDFusionToolException {
         Model metadata = new TreeModel();
         RepositoryResult<Statement> metadataResult;
         try {
@@ -157,37 +161,56 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
             }
             return metadata;
         } catch (RepositoryException | DataUnitException e) {
-            throw new ODCSFusionToolException("Error when loading metadata from input", e);
+            throw new LDFusionToolException("Error when loading metadata from input", e);
         }
     }
 
     @Override
-    protected UriMappingIterable getUriMapping() throws ODCSFusionToolException, IOException {
+    public UriMappingIterable getUriMapping() throws LDFusionToolException, IOException {
         // FIXME: preference of prefixes from configuration
-        Set<String> preferredURIs = getPreferredURIs(
-                config.getPropertyResolutionStrategies().keySet(),
-                getCanonicalUrisFile(),
-                config.getPreferredCanonicalURIs());
-
+        Set<String> preferredURIs = getPreferredURIs();
         UriMappingIterableImpl uriMapping = new UriMappingIterableImpl(preferredURIs);
         DataUnitSameAsLinkLoader sameAsLoader = new DataUnitSameAsLinkLoader(sameAsInput, config.getSameAsLinkTypes());
         sameAsLoader.loadSameAsLinks(uriMapping);
         return uriMapping;
     }
 
+    /**
+     * Returns set of URIs preferred for canonical URIs.
+     * The URIs are loaded from canonicalURIsInputFile if given and URIs present in settingsPreferredURIs are added.
+     * @return set of URIs preferred for canonical URIs
+     * @throws java.io.IOException error reading canonical URIs from file
+     */
+    protected Set<String> getPreferredURIs() throws IOException {
+        Collection<String> preferredCanonicalURIs = config.getPreferredCanonicalURIs();
+        File canonicalURIsInputFile = getCanonicalUrisFile();
+        Set<URI> settingsPreferredURIs = config.getPropertyResolutionStrategies().keySet();
+
+        Set<String> preferredURIs = new HashSet<>(settingsPreferredURIs.size());
+        for (URI uri : settingsPreferredURIs) {
+            preferredURIs.add(uri.stringValue());
+        }
+        if (canonicalURIsInputFile != null) {
+            new CanonicalUriFileHelper().readCanonicalUris(canonicalURIsInputFile, preferredURIs);
+        }
+        preferredURIs.addAll(preferredCanonicalURIs);
+
+        return preferredURIs;
+    }
+
     @Override
-    protected CloseableRDFWriter createRDFWriter() throws IOException, ODCSFusionToolException {
+    public CloseableRDFWriter getRDFWriter() throws IOException, LDFusionToolException {
         try {
             return config.getWriteMetadata()
                     ? new DataUnitRDFWriterWithMetadata(rdfOutput)
                     : new DataUnitRDFWriter(rdfOutput);
         } catch (DataUnitException e) {
-            throw new ODCSFusionToolException("Error creating output writer", e);
+            throw new LDFusionToolException("Error creating output writer", e);
         }
     }
 
     @Override
-    protected ResourceDescriptionConflictResolver createConflictResolver(Model metadata, UriMappingIterable uriMapping) {
+    public ResourceDescriptionConflictResolver getConflictResolver(Model metadata, UriMappingIterable uriMapping) {
         DistanceMeasureImpl distanceMeasure = new DistanceMeasureImpl();
         SourceQualityCalculator sourceQualityCalculator = new ODCSSourceQualityCalculator(
                 config.getScoreIfUnknown(),
@@ -210,19 +233,29 @@ public class FusionToolDpuRunner extends AbstractFusionToolRunner {
     }
 
     @Override
-    protected void writeSameAsLinks(UriMappingIterable uriMapping) throws IOException, ODCSFusionToolException {
+    public cz.cuni.mff.odcleanstore.fusiontool.writers.SameAsLinkWriter getSameAsLinksWriter() throws IOException {
         // Do nothing
+        return null;
     }
 
     @Override
-    protected void writeCanonicalURIs(UriMappingIterable uriMapping) throws IOException {
+    public CanonicalUriFileWriter getCanonicalUriWriter(UriMappingIterable uriMapping) throws IOException {
         if (config.getCanonicalURIsFileName() != null) {
             Set<String> canonicalUris = new HashSet<>();
             for (String mappedUri : uriMapping) {
                 canonicalUris.add(uriMapping.getCanonicalURI(mappedUri));
             }
-            canonicalUriFileReader.writeCanonicalUris(getCanonicalUrisFile(), canonicalUris);
+            new CanonicalUriFileHelper().writeCanonicalUris(getCanonicalUrisFile(), canonicalUris);
         }
+        return null;
+    }
+
+    public ProfilingTimeCounter<EnumFusionCounters> getExecutorTimeProfiler() {
+        return executorTimeProfiler;
+    }
+
+    public MemoryProfiler getExecutorMemoryProfiler() {
+        return executorMemoryProfiler;
     }
 
     private File getCanonicalUrisFile() {

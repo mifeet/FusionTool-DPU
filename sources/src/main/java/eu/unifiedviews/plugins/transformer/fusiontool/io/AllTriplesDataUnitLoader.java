@@ -1,9 +1,9 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.io;
 
 import cz.cuni.mff.odcleanstore.fusiontool.config.LDFTConfigConstants;
-import cz.cuni.mff.odcleanstore.fusiontool.exceptions.ODCSFusionToolException;
+import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.data.AllTriplesLoader;
-import cz.cuni.mff.odcleanstore.fusiontool.util.ODCSFusionToolAppUtils;
+import cz.cuni.mff.odcleanstore.fusiontool.util.LDFusionToolUtils;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import org.openrdf.OpenRDFException;
@@ -65,7 +65,7 @@ public class AllTriplesDataUnitLoader implements AllTriplesLoader {
     }
 
     @Override
-    public void loadAllTriples(RDFHandler rdfHandler) throws ODCSFusionToolException {
+    public void loadAllTriples(RDFHandler rdfHandler) throws LDFusionToolException {
         LOG.info("Loading input quads from data unit");
         RDFDataUnit.Iteration contextsIteration = null;
         try {
@@ -77,11 +77,11 @@ public class AllTriplesDataUnitLoader implements AllTriplesLoader {
                 totalLoadedQuads += loadAllTriplesForGraph(contextsIteration.next().getDataGraphURI(), rdfHandler);
             }
             rdfHandler.endRDF();
-            LOG.info("Loaded {} input quads from data unit in {}", totalLoadedQuads,  ODCSFusionToolAppUtils.formatProfilingTime(System.currentTimeMillis() - totalStartTime));
+            LOG.info("Loaded {} input quads from data unit in {}", totalLoadedQuads,  LDFusionToolUtils.formatProfilingTime(System.currentTimeMillis() - totalStartTime));
         } catch (RDFHandlerException e) {
-            throw new ODCSFusionToolException("Error processing quads from data unit: " + e.getMessage(), e);
+            throw new LDFusionToolException("Error processing quads from data unit: " + e.getMessage(), e);
         } catch (DataUnitException | OpenRDFException e) {
-            throw new ODCSFusionToolException("Error loading quads from data unit: " + e.getMessage(), e);
+            throw new LDFusionToolException("Error loading quads from data unit: " + e.getMessage(), e);
         } finally {
             if (contextsIteration != null) {
                 try {
@@ -165,18 +165,18 @@ public class AllTriplesDataUnitLoader implements AllTriplesLoader {
     }
 
     @Override
-    public URI getDefaultContext() throws ODCSFusionToolException {
+    public URI getDefaultContext() throws LDFusionToolException {
         return defaultContext;
     }
 
     @Override
-    public void close() throws ODCSFusionToolException {
+    public void close() throws LDFusionToolException {
         try {
             if (_connection != null) {
                 _connection.close();
             }
         } catch (RepositoryException e) {
-            throw new ODCSFusionToolException("Error closing data unit connection", e);
+            throw new LDFusionToolException("Error closing data unit connection", e);
         }
     }
 }

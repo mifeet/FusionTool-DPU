@@ -3,8 +3,11 @@ package eu.unifiedviews.plugins.transformer.fusiontool;
 import com.google.common.collect.ImmutableList;
 import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
+import cz.cuni.mff.odcleanstore.fusiontool.FusionRunner;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
-import cz.cuni.mff.odcleanstore.fusiontool.exceptions.ODCSFusionToolException;
+import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
+import cz.cuni.mff.odcleanstore.fusiontool.util.EnumFusionCounters;
+import cz.cuni.mff.odcleanstore.fusiontool.util.ProfilingTimeCounter;
 import eu.unifiedviews.dataunit.DataUnit;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
@@ -119,15 +122,22 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
             List<RDFDataUnit> rdfInputs = ImmutableList.of(rdfInput, rdfInput2);
 
             // Execute data fusion
-            FusionToolDpuRunner runner = new FusionToolDpuRunner(
+            FusionToolDpuComponentFactory componentFactory = new FusionToolDpuComponentFactory(
                     configContainer,
                     context,
                     rdfInputs,
                     sameAsInput,
                     metadataInput,
                     rdfOutput);
+            FusionRunner runner = new FusionRunner(componentFactory);
+            runner.setProfilingOn(configContainer.isProfilingOn());
             runner.runFusionTool();
-        } catch (ConflictResolutionException | IOException | ODCSFusionToolException e) {
+
+            if (configContainer.isProfilingOn()) {
+                printProfilingInformation(componentFactory, runner);
+            }
+
+        } catch (ConflictResolutionException | IOException | LDFusionToolException e) {
             logException(e);
             throw new FusionToolDpuException(FusionToolDpuErrorCodes.FUSION_TOOL_EXECUTION_ERROR, e);
         }
@@ -171,4 +181,19 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
             LOG.error("  " + e.getCause().getMessage());
         }
     }
+
+    private void printProfilingInformation(FusionToolDpuComponentFactory componentFactory, FusionRunner runner) {
+        ProfilingTimeCounter<EnumFusionCounters> timeProfiler = runner.getTimeProfiler();
+        timeProfiler.addProfilingTimeCounter(componentFactory.getExecutorTimeProfiler());
+        LOG.info("-- Profiling information --------");
+        LOG.info("Initialization time:              " + timeProfiler.formatCounter(EnumFusionCounters.INITIALIZATION));
+        LOG.info("Reading metadata & sameAs links:  " + timeProfiler.formatCounter(EnumFusionCounters.META_INITIALIZATION));
+        LOG.info("Data preparation time:            " + timeProfiler.formatCounter(EnumFusionCounters.DATA_INITIALIZATION));
+        LOG.info("Triple loading time:              " + timeProfiler.formatCounter(EnumFusionCounters.QUAD_LOADING));
+        LOG.info("Input filtering time:             " + timeProfiler.formatCounter(EnumFusionCounters.INPUT_FILTERING));
+        LOG.info("Buffering time:                   " + timeProfiler.formatCounter(EnumFusionCounters.BUFFERING));
+        LOG.info("Conflict resolution time:         " + timeProfiler.formatCounter(EnumFusionCounters.CONFLICT_RESOLUTION));
+        LOG.info("Output writing time:              " + timeProfiler.formatCounter(EnumFusionCounters.OUTPUT_WRITING));
+    }
+
 }

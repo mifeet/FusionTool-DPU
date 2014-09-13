@@ -2,7 +2,7 @@ package eu.unifiedviews.plugins.transformer.fusiontool.io;
 
 import cz.cuni.mff.odcleanstore.fusiontool.config.LDFTConfigConstants;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.urimapping.UriMappingIterableImpl;
-import cz.cuni.mff.odcleanstore.fusiontool.exceptions.ODCSFusionToolException;
+import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
 import cz.cuni.mff.odcleanstore.fusiontool.util.CloseableRepositoryConnection;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
@@ -30,14 +30,14 @@ public class DataUnitSameAsLinkLoader {
         this.sameAsLinkTypes = sameAsLinkTypes;
     }
 
-    public void loadSameAsLinks(UriMappingIterableImpl uriMapping) throws ODCSFusionToolException {
+    public void loadSameAsLinks(UriMappingIterableImpl uriMapping) throws LDFusionToolException {
         LOG.info("Loading sameAs links...");
         try (CloseableRepositoryConnection connection = new CloseableRepositoryConnection(dataUnit.getConnection())) {
             long startTime = System.currentTimeMillis();
             long loadedCount = loadFromConnection(uriMapping, connection.getConnection());
             LOG.info(String.format("Loaded & resolved %,d sameAs links in %,d ms", loadedCount, System.currentTimeMillis() - startTime));
         } catch (OpenRDFException | DataUnitException e) {
-            throw new ODCSFusionToolException("Error when loading owl:sameAs links from input", e);
+            throw new LDFusionToolException("Error when loading owl:sameAs links from input", e);
         }
     }
 
