@@ -128,6 +128,43 @@ public class ConfigReaderTest {
         assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
     }
 
+    @Test
+    public void parsesEmptyString() throws Exception {
+        ConfigContainer config = ConfigReader.parseConfigXml("");
+        // Assert
+        assertThat(config.getDefaultResolutionStrategy(), notNullValue());
+        assertThat(config.getDefaultResolutionStrategy().getResolutionFunctionName(), nullValue());
+        assertThat(config.getDefaultResolutionStrategy().getAggregationErrorStrategy(), nullValue());
+        assertThat(config.getDefaultResolutionStrategy().getCardinality(), nullValue());
+        assertThat(config.getDefaultResolutionStrategy().getDependsOn(), nullValue());
+        assertThat(config.getDefaultResolutionStrategy().getParams(), notNullValue());
+        assertThat(config.getDefaultResolutionStrategy().getParams().size(), equalTo(0));
+        assertThat(config.getEnableFileCache(), equalTo(false));
+        assertThat(config.getMaxOutputTriples(), nullValue());
+        assertThat(config.getPrefixes(), equalTo(Collections.<String, String>emptyMap()));
+        assertThat(config.getRequiredClassOfProcessedResources(), nullValue());
+        assertThat(config.getPropertyResolutionStrategies(), equalTo(Collections.<URI, ResolutionStrategy>emptyMap()));
+        assertThat(config.isLocalCopyProcessing(), equalTo(true));
+
+        assertThat(config.getMaxDateDifference(), equalTo(FTConfigConstants.MAX_DATE_DIFFERENCE));
+        assertThat(config.getOutputMappedSubjectsOnly(), equalTo(false));
+        assertThat(config.getPreferredCanonicalURIs(), equalTo(FTConfigConstants.DEFAULT_PREFERRED_CANONICAL_URIS));
+        assertThat(config.getResultDataURIPrefix(), notNullValue());
+        assertThat(config.getPublisherScoreWeight(), equalTo(FTConfigConstants.PUBLISHER_SCORE_WEIGHT));
+        assertThat(config.getAgreeCoefficient(), equalTo(FTConfigConstants.AGREE_COEFFICIENT));
+        assertThat(config.getQueryTimeout(), equalTo(FTConfigConstants.DEFAULT_QUERY_TIMEOUT));
+        assertThat(config.getScoreIfUnknown(), equalTo(FTConfigConstants.SCORE_IF_UNKNOWN));
+        assertThat(config.isProfilingOn(), equalTo(false));
+        assertThat(config.getMaxFreeMemoryUsage(), equalTo(FTConfigConstants.MAX_FREE_MEMORY_USAGE));
+        assertThat(config.getMemoryLimit(), equalTo(null));
+        assertThat(config.getParserConfig(), equalTo(FTConfigConstants.DEFAULT_FILE_PARSER_CONFIG));
+
+        assertThat(config.getCanonicalURIsFileName(), is(FTConfigConstants.CANONICAL_URI_FILE_NAME));
+        assertThat(config.getFileOutputs(), is(Collections.<FileOutput>emptyList()));
+        assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
+        assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
+    }
+
     @Test(expected = InvalidInputException.class)
     public void throwsInvalidInputExceptionWhenInputFileInvalid() throws Exception {
         // Arrange

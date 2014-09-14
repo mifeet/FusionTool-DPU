@@ -16,6 +16,7 @@ import org.openrdf.sail.memory.MemoryStore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utility methods for JUnit tests.
@@ -27,12 +28,11 @@ public final class FTDPUTestUtils {
     private FTDPUTestUtils() {
     }
 
-    private static volatile long uriCounter = 0;
+    private static AtomicLong uriCounter = new AtomicLong(0);
 
     /** Returns a URI unique within a test run. @return URI as a string */
     public static String getUniqueURIString() {
-        uriCounter++;
-        return "http://example.com/" + Long.toString(uriCounter);
+        return "http://example.com/" + Long.toString(uriCounter.incrementAndGet());
     }
     
     /** Returns a URI unique within a test run. @return URI */
@@ -42,7 +42,7 @@ public final class FTDPUTestUtils {
 
     /** Resets the URI counter used by {@link #getUniqueURIString()}. */
     public static void resetURICounter() {
-        uriCounter = 0;
+        uriCounter.set(0);
     }
 
     /**
