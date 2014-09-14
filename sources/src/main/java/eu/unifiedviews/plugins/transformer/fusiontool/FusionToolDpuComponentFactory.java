@@ -25,8 +25,9 @@ import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.MappedResourceFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.RequiredClassFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.ResourceDescriptionFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.util.*;
-import cz.cuni.mff.odcleanstore.fusiontool.writers.CanonicalUriFileWriter;
 import cz.cuni.mff.odcleanstore.fusiontool.writers.CloseableRDFWriter;
+import cz.cuni.mff.odcleanstore.fusiontool.writers.NoOpUriMappingWriter;
+import cz.cuni.mff.odcleanstore.fusiontool.writers.UriMappingWriter;
 import cz.cuni.mff.odcleanstore.vocabulary.ODCSInternal;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
@@ -38,15 +39,12 @@ import eu.unifiedviews.plugins.transformer.fusiontool.io.AllTriplesDataUnitLoade
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriter;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriterWithMetadata;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitSameAsLinkLoader;
-import eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,10 +57,7 @@ import java.util.*;
  * @author Jan Michelfeit
  */
 public class FusionToolDpuComponentFactory implements FusionComponentFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuComponentFactory.class);
-
-    /** An instance of {@link eu.unifiedviews.plugins.transformer.fusiontool.io.file.FileOutputWriterFactory}. */
-    protected static final FileOutputWriterFactory RDF_WRITER_FACTORY = new FileOutputWriterFactory();
+    //private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuComponentFactory.class);
 
     private ConfigContainer config;
     private DPUContext executionContext;
@@ -154,8 +149,8 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
     public Model getMetadata() throws LDFusionToolException {
         Model metadata = new TreeModel();
         RepositoryResult<Statement> metadataResult;
-        try {
-            metadataResult = metadataInput.getConnection().getStatements(null, null, null, false);
+        try (CloseableRepositoryConnection connection = new CloseableRepositoryConnection(metadataInput.getConnection())) {
+            metadataResult = connection.get().getStatements(null, null, null, false);
             while (metadataResult.hasNext()) {
                 metadata.add(metadataResult.next());
             }
@@ -233,13 +228,12 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
     }
 
     @Override
-    public cz.cuni.mff.odcleanstore.fusiontool.writers.SameAsLinkWriter getSameAsLinksWriter() throws IOException {
-        // Do nothing
-        return null;
+    public UriMappingWriter getSameAsLinksWriter() throws IOException {
+        return new NoOpUriMappingWriter();
     }
 
     @Override
-    public CanonicalUriFileWriter getCanonicalUriWriter(UriMappingIterable uriMapping) throws IOException {
+    public UriMappingWriter getCanonicalUriWriter(UriMappingIterable uriMapping) throws IOException {
         if (config.getCanonicalURIsFileName() != null) {
             Set<String> canonicalUris = new HashSet<>();
             for (String mappedUri : uriMapping) {
@@ -247,15 +241,11 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
             }
             new CanonicalUriFileHelper().writeCanonicalUris(getCanonicalUrisFile(), canonicalUris);
         }
-        return null;
+        return new NoOpUriMappingWriter();
     }
 
     public ProfilingTimeCounter<EnumFusionCounters> getExecutorTimeProfiler() {
         return executorTimeProfiler;
-    }
-
-    public MemoryProfiler getExecutorMemoryProfiler() {
-        return executorMemoryProfiler;
     }
 
     private File getCanonicalUrisFile() {
