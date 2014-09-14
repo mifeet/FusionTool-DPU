@@ -12,10 +12,7 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
     private final Repository repository;
@@ -23,8 +20,12 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
     private URI dataGraphURI = FTDPUTestUtils.getUniqueURI();
     private Map<String, URI> addedGraphs = new HashMap<>();
 
-    public MockRDFDataUnit(Repository repository) {
-        this.repository = repository;
+    public MockRDFDataUnit() throws RepositoryException {
+        this.repository = FTDPUTestUtils.createRepository(ImmutableSet.<Statement>of());
+    }
+
+    public MockRDFDataUnit(Collection<Statement> initialStatements) throws RepositoryException {
+        this.repository = FTDPUTestUtils.createRepository(initialStatements);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
 
     @Override
     public URI addNewDataGraph(String s) throws DataUnitException {
-        URI uri = FTDPUTestUtils.createHttpUri(s);
+        URI uri = FTDPUTestUtils.createHttpUri("mockDU/" + s);
         addedGraphs.put(s, uri);
         return uri;
     }
@@ -76,6 +77,18 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
     @Override
     public URI getMetadataWriteGraphname() throws DataUnitException {
         return metadataGraphURI;
+    }
+
+    //public URI getMetadataGraphURI() {
+    //    return metadataGraphURI;
+    //}
+
+    public URI getDataGraphURI() {
+        return dataGraphURI;
+    }
+
+    public void setDataGraphURI(URI dataGraphURI) {
+        this.dataGraphURI = dataGraphURI;
     }
 
     public Map<String, URI> getAddedGraphs() {

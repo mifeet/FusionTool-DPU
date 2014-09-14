@@ -61,7 +61,7 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
 
     private ConfigContainer config;
     private DPUContext executionContext;
-    private List<RDFDataUnit> rdfInputs;
+    private List<? extends RDFDataUnit> rdfInputs;
     private RDFDataUnit sameAsInput;
     private RDFDataUnit metadataInput;
     private WritableRDFDataUnit rdfOutput;
@@ -78,7 +78,7 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
      * @param rdfOutput RDF output data
      */
     public FusionToolDpuComponentFactory(
-            ConfigContainer config, DPUContext executionContext, List<RDFDataUnit> rdfInputs,
+            ConfigContainer config, DPUContext executionContext, List<? extends RDFDataUnit> rdfInputs,
             RDFDataUnit sameAsInput, RDFDataUnit metadataInput, WritableRDFDataUnit rdfOutput) {
         this.config = config;
         this.executionContext = executionContext;
@@ -128,7 +128,7 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
         return FederatedResourceDescriptionFilter.fromList(inputFilters);
     }
 
-    protected Collection<AllTriplesLoader> getAllTriplesLoaders(List<RDFDataUnit> rdfInputs) throws LDFusionToolException {
+    protected Collection<AllTriplesLoader> getAllTriplesLoaders(List<? extends RDFDataUnit> rdfInputs) throws LDFusionToolException {
         List<AllTriplesLoader> loaders = new ArrayList<>(rdfInputs.size());
         for (RDFDataUnit rdfInput : rdfInputs) {
             try {
