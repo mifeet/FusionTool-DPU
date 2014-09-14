@@ -22,6 +22,14 @@
         <odcsft-version>1.1-SNAPSHOT</odcsft-version>
         <sesame-version>2.7.11</sesame-version>
         <uv-version>1.0.0</uv-version>
+        
+        <odcs.version>1.3.0</odcs.version>
+        <!-- define used vaadin version !!! do not forget to update the version for OSGI's package export -->
+		<vaadin.version>7.1.8</vaadin.version>
+		<!-- the minimal required vaadin version The lowest Vaadin version accepted by DPUs. -->
+		<vaadin.version.min>7.1.8</vaadin.version.min>
+		<!-- max vaadin version accepted be DPUs The highest Vaadin version accepted by DPUs. -->
+		<vaadin.version.max>8.0.0</vaadin.version.max>
     </properties>
 
     <repositories>
@@ -75,7 +83,7 @@
         <dependency>
             <groupId>cz.cuni.mff.xrg.odcs</groupId>
             <artifactId>commons-app</artifactId>
-            <version>1.3.0</version>
+            <version>${odcs.version}</version>
         </dependency>
 
         <dependency>
@@ -221,23 +229,46 @@
                 <version>2.3.7</version>
                 <extensions>true</extensions>
                 <configuration>
+                	<!-- exclude dependencies provided by application -->
+                    <excludeDependencies>
+                        *;groupId=eu.unifiedviews
+                        *;groupId=cz.cuni.mff.xrg.odcs
+                        ,*;groupId=com.vaadin
+                        ,*;groupId=org.openrdf.sesame
+                        ,org.slf4j
+                        
+                        <!-- add any new application provided library here ... -->
+						,*;groupId=com.h2database
+						,*;groupId=org.eclipse.persistence
+						,*;groupId=org.eclipse.tycho
+						,*;groupId=mysql
+                    </excludeDependencies>
                     <instructions>
-                        <!-- use provided for dependencies that are provided by application -->
-                        <Embed-Dependency>simple-xml|mapdb|stax*|xpp3;scope=compile|runtime;inline=false,*;groupId=cz.cuni.mff.odcleanstore</Embed-Dependency>
-                        <!-- using true cause adding new imports for new packages !! -->
-                        <Embed-Transitive>true</Embed-Transitive>
-                        <Export-Package>${dpu.package}*;version="${project.version}"</Export-Package>
-
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-Description>${project.description}</Bundle-Description>
-
+                        <Export-Package>${dpu.package};version="${project.version}"</Export-Package>
+                        <Import-Package>
+                            cz.cuni.mff.xrg.odcs.*;version="${odcs.version}",com.vaadin.*;version="[${vaadin.version.min},
+                            ${vaadin.version.max})",*
+                        </Import-Package>
+                        <!-- dependencies embedding -->
+                        <Embed-Dependency>*;scope=compile|system</Embed-Dependency>
+                        <!-- use provided for dependencies that are provided by application -->
+                        <!-- dependencies location in output file -->
+                        <Embed-Directory>dependency</Embed-Directory>
+                        <Embed-StripGroup>false</Embed-StripGroup>
                         <!-- information for ODCleanStore -->
                         <DPU-Package>${dpu.package}</DPU-Package>
                         <DPU-MainClass>${dpu.mainClass}</DPU-MainClass>
+                        <!-- Current Vaadin version -->
+                        <Vaadin-Version>${vaadin.version}</Vaadin-Version>
                         <Build-Time>${maven.build.timestamp}</Build-Time>
-                    </instructions>
+                        
+                        <!-- using true cause adding new imports for new packages !! -->
+                        <Embed-Transitive>true</Embed-Transitive>
+                    </instructions> 
                 </configuration>
             </plugin>
 
