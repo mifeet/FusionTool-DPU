@@ -7,6 +7,7 @@ import cz.cuni.mff.odcleanstore.fusiontool.FusionRunner;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
 import cz.cuni.mff.odcleanstore.fusiontool.util.EnumFusionCounters;
+import cz.cuni.mff.odcleanstore.fusiontool.util.LDFusionToolUtils;
 import cz.cuni.mff.odcleanstore.fusiontool.util.ProfilingTimeCounter;
 import eu.unifiedviews.dataunit.DataUnit;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
@@ -30,12 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Implementation of ODCS-FusionTool as an ODCleanStore DPU.
@@ -138,18 +135,13 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
             }
 
         } catch (ConflictResolutionException | IOException | LDFusionToolException e) {
-            logException(e);
-            throw new FusionToolDpuException(FusionToolDpuErrorCodes.FUSION_TOOL_EXECUTION_ERROR, e);
+            handleException(e);
         }
 
-        LOG.info("Fusion Tool DPU executed in {}", formatRunTime(System.currentTimeMillis() - startTime));
+        LOG.info("Fusion Tool DPU executed in {}", LDFusionToolUtils.formatTime(System.currentTimeMillis() - startTime));
     }
 
     private static void checkValidInput(ConfigContainer config) throws InvalidInputException {
-        if (!ODCSUtils.isValidIRI(config.getResultDataURIPrefix())) {
-            throw new InvalidInputException("Result data URI prefix must be a valid URI, '" + config.getResultDataURIPrefix()
-                    + "' given");
-        }
         for (Map.Entry<String, String> prefixEntry : config.getPrefixes().entrySet()) {
             if (!prefixEntry.getKey().isEmpty() && !ODCSUtils.isValidNamespacePrefix(prefixEntry.getKey())) {
                 throw new InvalidInputException("Invalid namespace prefix '" + prefixEntry.getKey() + "'");
@@ -160,26 +152,18 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         }
     }
 
-    private static String formatRunTime(long runTime) {
-        final long hourMs = ODCSUtils.MILLISECONDS * ODCSUtils.TIME_UNIT_60 * ODCSUtils.TIME_UNIT_60;
-        DateFormat timeFormat = new SimpleDateFormat("mm:ss.SSS");
-        timeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return String.format("%d:%s",
-                runTime / hourMs,
-                timeFormat.format(new Date(runTime)));
-    }
-
     private static void setLogLevel(boolean isDebugging) {
         Level logLevel = isDebugging ? Level.DEBUG : Level.INFO;
         LogManager.getLogger(FusionToolDpu.class.getPackage().getName()).setLevel(logLevel);
         LogManager.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName()).setLevel(logLevel);
     }
 
-    private static void logException(Exception e) {
+    private static void handleException(Exception e) throws DPUException {
         LOG.error(e.getMessage());
         if (e.getCause() != null) {
             LOG.error("  " + e.getCause().getMessage());
         }
+        throw new FusionToolDpuException(FusionToolDpuErrorCodes.FUSION_TOOL_EXECUTION_ERROR, e);
     }
 
     private void printProfilingInformation(FusionToolDpuComponentFactory componentFactory, FusionRunner runner) {

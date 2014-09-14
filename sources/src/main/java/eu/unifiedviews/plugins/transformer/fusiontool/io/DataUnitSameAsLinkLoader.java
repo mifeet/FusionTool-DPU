@@ -34,7 +34,7 @@ public class DataUnitSameAsLinkLoader {
         LOG.info("Loading sameAs links...");
         try (CloseableRepositoryConnection connection = new CloseableRepositoryConnection(dataUnit.getConnection())) {
             long startTime = System.currentTimeMillis();
-            long loadedCount = loadFromConnection(uriMapping, connection.getConnection());
+            long loadedCount = loadFromConnection(uriMapping, connection.get());
             LOG.info(String.format("Loaded & resolved %,d sameAs links in %,d ms", loadedCount, System.currentTimeMillis() - startTime));
         } catch (OpenRDFException | DataUnitException e) {
             throw new LDFusionToolException("Error when loading owl:sameAs links from input", e);

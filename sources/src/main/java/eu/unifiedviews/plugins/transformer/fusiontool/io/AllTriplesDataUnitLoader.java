@@ -77,7 +77,7 @@ public class AllTriplesDataUnitLoader implements AllTriplesLoader {
                 totalLoadedQuads += loadAllTriplesForGraph(contextsIteration.next().getDataGraphURI(), rdfHandler);
             }
             rdfHandler.endRDF();
-            LOG.info("Loaded {} input quads from data unit in {}", totalLoadedQuads,  LDFusionToolUtils.formatProfilingTime(System.currentTimeMillis() - totalStartTime));
+            LOG.info("Loaded {} input quads from data unit in {}", totalLoadedQuads,  LDFusionToolUtils.formatTime(System.currentTimeMillis() - totalStartTime));
         } catch (RDFHandlerException e) {
             throw new LDFusionToolException("Error processing quads from data unit: " + e.getMessage(), e);
         } catch (DataUnitException | OpenRDFException e) {
