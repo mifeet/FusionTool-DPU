@@ -53,10 +53,13 @@ public class AllTriplesDataUnitLoader implements AllTriplesLoader {
 
     public AllTriplesDataUnitLoader(RDFDataUnit rdfInput) throws DataUnitException {
         RDFDataUnit.Iteration defaultContextIteration = rdfInput.getIteration();
-        defaultContext = defaultContextIteration.hasNext()
-                ? defaultContextIteration.next().getDataGraphURI()
-                : null;
-        defaultContextIteration.close();
+        try {
+            defaultContext = defaultContextIteration.hasNext()
+                    ? defaultContextIteration.next().getDataGraphURI()
+                    : null;
+        } finally {
+            defaultContextIteration.close();
+        }
         this.rdfInput = rdfInput;
     }
 
