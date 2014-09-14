@@ -160,8 +160,12 @@ public final class FTDPUTestUtils {
         try {
             List<Statement> result = new ArrayList<>();
             RepositoryResult<Statement> repositoryResult = connection.getStatements(null, null, null, false);
-            while (repositoryResult.hasNext()) {
-                result.add(repositoryResult.next());
+            try {
+                while (repositoryResult.hasNext()) {
+                    result.add(repositoryResult.next());
+                }
+            } finally {
+                repositoryResult.close();
             }
             return result;
         } finally {

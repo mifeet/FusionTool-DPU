@@ -1,5 +1,6 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.testutils;
 
+import com.google.common.base.Function;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
@@ -14,6 +15,12 @@ import org.openrdf.model.Statement;
  * the context of expected statement can be arbitrary.
  */
 public class ContextAwareStatementIsEqual extends BaseMatcher<Statement> {
+    public static final Function<Statement, Matcher<? super Statement>> STATEMENT_TO_MATCHER = new Function<Statement, Matcher<? super Statement>>() {
+        @Override
+        public Matcher<? super Statement> apply(Statement input) {
+            return contextAwareStatementIsEqual(input);
+        }
+    };
     private final Statement expectedStatement;
 
     public ContextAwareStatementIsEqual(Statement expectedStatement) {
