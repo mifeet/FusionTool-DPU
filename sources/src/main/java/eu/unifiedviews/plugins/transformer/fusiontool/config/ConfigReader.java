@@ -7,28 +7,19 @@ import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionStrategy;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolutionStrategyImpl;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.odcleanstore.fusiontool.config.ConfigParameters;
-import cz.cuni.mff.odcleanstore.fusiontool.config.xml.ConflictResolutionXml;
-import cz.cuni.mff.odcleanstore.fusiontool.config.xml.ParamXml;
-import cz.cuni.mff.odcleanstore.fusiontool.config.xml.PrefixXml;
-import cz.cuni.mff.odcleanstore.fusiontool.config.xml.PropertyResolutionStrategyXml;
-import cz.cuni.mff.odcleanstore.fusiontool.config.xml.PropertyXml;
-import cz.cuni.mff.odcleanstore.fusiontool.config.xml.ResolutionStrategyXml;
+import cz.cuni.mff.odcleanstore.fusiontool.config.xml.*;
+import cz.cuni.mff.odcleanstore.fusiontool.io.EnumSerializationFormat;
 import cz.cuni.mff.odcleanstore.fusiontool.util.NamespacePrefixExpander;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.xml.ConfigXml;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.xml.FileOutputXml;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
-import eu.unifiedviews.plugins.transformer.fusiontool.io.EnumSerializationFormat;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Reads the XML configuration file and produces instances of configuration in a {@link ConfigContainer} instance.
@@ -183,12 +174,7 @@ public final class ConfigReader {
             ConfigContainerImpl config,
             NamespacePrefixExpander prefixExpander) throws InvalidInputException {
         for (ParamXml param : params) {
-            if (param.getValue() == null) {
-                continue;
-            } else if (ConfigParameters.PROCESSING_MAX_OUTPUT_TRIPLES.equalsIgnoreCase(param.getName())) {
-                long value = convertToLong(param.getValue(), "Value of " + ConfigParameters.PROCESSING_MAX_OUTPUT_TRIPLES + " is not a valid number");
-                config.setMaxOutputTriples(value);
-            } else if (ConfigParameters.PROCESSING_ONLY_RESOURCES_WITH_CLASS.equalsIgnoreCase(param.getName())) {
+            if (ConfigParameters.PROCESSING_ONLY_RESOURCES_WITH_CLASS.equalsIgnoreCase(param.getName())) {
                 if (!ODCSUtils.isNullOrEmpty(param.getValue())) {
                     URI classUri = convertToUriWithExpansion(prefixExpander, param.getValue());
                     config.setRequiredClassOfProcessedResources(classUri);

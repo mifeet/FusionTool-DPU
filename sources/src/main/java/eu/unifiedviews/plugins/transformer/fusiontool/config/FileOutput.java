@@ -3,11 +3,10 @@
  */
 package eu.unifiedviews.plugins.transformer.fusiontool.config;
 
-import java.io.File;
-
+import cz.cuni.mff.odcleanstore.fusiontool.io.EnumSerializationFormat;
 import org.openrdf.model.URI;
 
-import eu.unifiedviews.plugins.transformer.fusiontool.io.EnumSerializationFormat;
+import java.io.File;
 
 /**
  * Container of settings for a file output of result data.
