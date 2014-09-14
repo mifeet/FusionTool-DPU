@@ -1,5 +1,6 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.collect.ImmutableList;
 import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
@@ -24,8 +25,6 @@ import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.simpleframework.xml.core.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,9 +152,11 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     }
 
     private static void setLogLevel(boolean isDebugging) {
-        Level logLevel = isDebugging ? Level.DEBUG : Level.INFO;
-        LogManager.getLogger(FusionToolDpu.class.getPackage().getName()).setLevel(logLevel);
-        LogManager.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName()).setLevel(logLevel);
+        Level level = isDebugging ? Level.DEBUG : Level.INFO;
+        ch.qos.logback.classic.Logger logger1 = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(FusionToolDpu.class.getPackage().getName());
+        logger1.setLevel(level);
+        ch.qos.logback.classic.Logger logger2 = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName());
+        logger2.setLevel(level);
     }
 
     private static void handleException(Exception e) throws DPUException {
