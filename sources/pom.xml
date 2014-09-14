@@ -33,14 +33,21 @@
     </properties>
 
     <repositories>
-        <repository>
-            <id>odcleanstore-1</id>
-            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>odcleanstore-thirdpary</id>
-            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
-        </repository>
+		<repository>
+			<id>cz.cuni.mff.ms.xrg.odcs</id>
+			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/groups/public/</url>
+		</repository>
+		
+		<repository>
+			<id>cz.cuni.mff.ms.xrg.odcs.thirdparty</id>
+			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
+		</repository>
+
+		<repository>
+			<id>maven.eea.sk</id>
+			<name>maven.eea.sk-public</name>
+			<url>http://maven.eea.sk/artifactory/public/</url>
+		</repository>
     </repositories>
 
     <dependencies>
