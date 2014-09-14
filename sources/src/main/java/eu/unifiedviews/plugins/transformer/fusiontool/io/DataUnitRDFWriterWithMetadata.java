@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class DataUnitRDFWriterWithMetadata extends CloseableRDFWriterBase {
     public static final String DATA_GRAPH_NAME_PREFIX = "result-";
+    public static final String METADATA_GRAPH_NAME = "metadata";
     private final RepositoryConnection connection;
     private final URI defaultContext;
     private final WritableRDFDataUnit dataUnit;
@@ -28,7 +29,7 @@ public class DataUnitRDFWriterWithMetadata extends CloseableRDFWriterBase {
         this.dataUnit = dataUnit;
         connection = dataUnit.getConnection();
         defaultContext = dataUnit.getBaseDataGraphURI();
-        metadataContext = dataUnit.addNewDataGraph("metadata");
+        metadataContext = dataUnit.addNewDataGraph(METADATA_GRAPH_NAME);
         valueFactory = connection.getValueFactory();
     }
 
