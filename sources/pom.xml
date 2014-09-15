@@ -88,12 +88,6 @@
         </dependency>
 
         <dependency>
-            <groupId>cz.cuni.mff.xrg.odcs</groupId>
-            <artifactId>commons-app</artifactId>
-            <version>${odcs.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.7</version>

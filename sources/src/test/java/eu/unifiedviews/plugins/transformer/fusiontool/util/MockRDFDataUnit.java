@@ -1,6 +1,5 @@
 package eu.unifiedviews.plugins.transformer.fusiontool.util;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
@@ -12,13 +11,29 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
     private final Repository repository;
-    private URI metadataGraphURI = FTDPUTestUtils.getUniqueURI();
-    private URI dataGraphURI = FTDPUTestUtils.getUniqueURI();
-    private Map<String, URI> addedGraphs = new HashMap<>();
+    private URI metadataGraphURI;
+    private URI dataGraphURI;
+    private Map<String, URI> addedGraphs;
+    private Set<URI> iterationGraphs;
+
+    {
+        metadataGraphURI = FTDPUTestUtils.getUniqueURI();
+        dataGraphURI = FTDPUTestUtils.getUniqueURI();
+        addedGraphs = new HashMap<>();
+        iterationGraphs = new HashSet<>();
+        iterationGraphs.add(dataGraphURI);
+    }
+
 
     public MockRDFDataUnit() throws RepositoryException {
         this.repository = FTDPUTestUtils.createRepository(ImmutableSet.<Statement>of());
@@ -44,7 +59,7 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
 
     @Override
     public RDFDataUnit.Iteration getIteration() throws DataUnitException {
-        return new MockIteration(dataGraphURI);
+        return new MockIteration();
     }
 
     @Override
@@ -60,12 +75,13 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
     @Override
     public void addExistingDataGraph(String s, URI uri) throws DataUnitException {
         addedGraphs.put(s, uri);
+        iterationGraphs.add(uri);
     }
 
     @Override
     public URI addNewDataGraph(String s) throws DataUnitException {
         URI uri = FTDPUTestUtils.createHttpUri("mockDU/" + s);
-        addedGraphs.put(s, uri);
+        addExistingDataGraph(s, uri);
         return uri;
     }
 
@@ -87,8 +103,10 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
         return dataGraphURI;
     }
 
-    public void setDataGraphURI(URI dataGraphURI) {
-        this.dataGraphURI = dataGraphURI;
+    public void setDataGraphURI(URI newDataGraphURI) {
+        iterationGraphs.remove(dataGraphURI);
+        dataGraphURI = newDataGraphURI;
+        iterationGraphs.add(newDataGraphURI);
     }
 
     public Map<String, URI> getAddedGraphs() {
@@ -99,24 +117,21 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
         return FTDPUTestUtils.getAllStatements(repository);
     }
 
-    private static class MockIteration implements RDFDataUnit.Iteration {
-        private boolean isFirst = true;
-        private final URI dataGraphURI;
+    private class MockIteration implements RDFDataUnit.Iteration {
+        private final Iterator<URI> iterator;
 
-        private MockIteration(URI dataGraphURI) {
-            this.dataGraphURI = dataGraphURI;
+        private MockIteration() {
+            this.iterator = iterationGraphs.iterator();
         }
 
         @Override
         public boolean hasNext() throws DataUnitException {
-            return isFirst;
+            return iterator.hasNext();
         }
 
         @Override
         public RDFDataUnit.Entry next() throws DataUnitException {
-            Preconditions.checkState(isFirst);
-            isFirst = false;
-            return new MockEntry(dataGraphURI);
+            return new MockEntry(iterator.next());
         }
 
         @Override
@@ -126,20 +141,20 @@ public class MockRDFDataUnit implements WritableRDFDataUnit, AutoCloseable {
     }
 
     private static class MockEntry implements RDFDataUnit.Entry {
-        private final URI dataGraphURI;
+        private final URI uri;
 
-        private MockEntry(URI dataGraphURI) {
-            this.dataGraphURI = dataGraphURI;
+        private MockEntry(URI uri) {
+            this.uri = uri;
         }
 
         @Override
         public URI getDataGraphURI() throws DataUnitException {
-            return dataGraphURI;
+            return uri;
         }
 
         @Override
         public String getSymbolicName() throws DataUnitException {
-            return dataGraphURI.stringValue();
+            return uri.stringValue();
         }
     }
 }

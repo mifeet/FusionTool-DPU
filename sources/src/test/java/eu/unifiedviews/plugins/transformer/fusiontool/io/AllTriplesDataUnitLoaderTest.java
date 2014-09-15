@@ -3,9 +3,10 @@ package eu.unifiedviews.plugins.transformer.fusiontool.io;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
-import cz.cuni.mff.xrg.odcs.commons.app.dataunit.rdf.AbstractRDFDataUnit;
 import eu.unifiedviews.dataunit.DataUnitException;
+import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
 import eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils;
+import eu.unifiedviews.plugins.transformer.fusiontool.util.MockRDFDataUnit;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.openrdf.model.Statement;
@@ -13,7 +14,6 @@ import org.openrdf.model.URI;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.helpers.StatementCollector;
 
@@ -39,16 +39,13 @@ public class AllTriplesDataUnitLoaderTest {
                 createHttpStatement("s4", "p", "o", "g4"),
                 createHttpStatement("s5", "p", "o", "g5")
         );
-        Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
         Collection<Statement> result = new HashSet<>();
-        AllTriplesDataUnitLoader loader = createLoader(repository, 2);
-        try {
+        try (MockRDFDataUnit rdfDataUnit = getDataUnit(statements);
+             AllTriplesDataUnitLoader loader = getLoader(rdfDataUnit, 2)
+        ) {
             loader.loadAllTriples(new StatementCollector(result));
-        } finally {
-            loader.close();
-            repository.shutDown();
         }
 
         // Assert
@@ -68,12 +65,10 @@ public class AllTriplesDataUnitLoaderTest {
 
         // Act
         Collection<Statement> result = new HashSet<>();
-        AllTriplesDataUnitLoader loader = createLoader(repository, 2);
-        try {
+        try (MockRDFDataUnit rdfDataUnit = getDataUnit(statements);
+             AllTriplesDataUnitLoader loader = getLoader(rdfDataUnit, 2)
+        ) {
             loader.loadAllTriples(new StatementCollector(result));
-        } finally {
-            loader.close();
-            repository.shutDown();
         }
 
         // Assert
@@ -92,7 +87,6 @@ public class AllTriplesDataUnitLoaderTest {
                 createHttpStatement("s4", "p", "o", "g4")
         );
         Repository repository = FTDPUTestUtils.createRepository(statements);
-        AllTriplesDataUnitLoader loader = createLoader(repository, 2);
 
         // Add extra statements after loader is created and graphs configured
         RepositoryConnection connection = repository.getConnection();
@@ -101,11 +95,10 @@ public class AllTriplesDataUnitLoaderTest {
 
         // Act
         Collection <Statement> result = new HashSet<>();
-        try {
+        try (MockRDFDataUnit rdfDataUnit = getDataUnit(statements);
+             AllTriplesDataUnitLoader loader = getLoader(rdfDataUnit, 2)
+        ) {
             loader.loadAllTriples(new StatementCollector(result));
-        } finally {
-            loader.close();
-            repository.shutDown();
         }
 
         // Assert
@@ -120,12 +113,10 @@ public class AllTriplesDataUnitLoaderTest {
 
         // Act
         Collection<Statement> result = new HashSet<>();
-        AllTriplesDataUnitLoader loader = createLoader(repository, 2);
-        try {
+        try (MockRDFDataUnit rdfDataUnit = getDataUnit(statements);
+             AllTriplesDataUnitLoader loader = getLoader(rdfDataUnit, 2)
+        ) {
             loader.loadAllTriples(new StatementCollector(result));
-        } finally {
-            loader.close();
-            repository.shutDown();
         }
 
         // Assert
@@ -142,12 +133,10 @@ public class AllTriplesDataUnitLoaderTest {
         Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
-        AllTriplesDataUnitLoader loader = createLoader(repository, 2);
-        try {
+        try (MockRDFDataUnit rdfDataUnit = getDataUnit(statements);
+             AllTriplesDataUnitLoader loader = getLoader(rdfDataUnit, 2)
+        ) {
             loader.loadAllTriples(rdfHandler);
-        } finally {
-            loader.close();
-            repository.shutDown();
         }
 
         // Assert
@@ -164,45 +153,29 @@ public class AllTriplesDataUnitLoaderTest {
         Repository repository = FTDPUTestUtils.createRepository(statements);
 
         // Act
-        AllTriplesDataUnitLoader loader = createLoader(repository, 2);
         URI defaultContext;
-        try {
+        try (MockRDFDataUnit rdfDataUnit = getDataUnit(statements);
+             AllTriplesDataUnitLoader loader = getLoader(rdfDataUnit, 2)
+        ) {
             defaultContext = loader.getDefaultContext();
-        } finally {
-            loader.close();
-            repository.shutDown();
         }
 
         // Assert
         assertTrue(ODCSUtils.isValidIRI(defaultContext.stringValue()));
     }
 
-    private AllTriplesDataUnitLoader createLoader(Repository repository, int maxSparqlResultsSize) throws RepositoryException, DataUnitException {
-        TestRDFDataUnit rdfInput = new TestRDFDataUnit(repository);
-        AllTriplesDataUnitLoader loader = new AllTriplesDataUnitLoader(rdfInput);
+    private AllTriplesDataUnitLoader getLoader(RDFDataUnit rdfDataUnit, int maxSparqlResultsSize) throws DataUnitException {
+        AllTriplesDataUnitLoader loader = new AllTriplesDataUnitLoader(rdfDataUnit);
         loader.setMaxSparqlResultsSize(maxSparqlResultsSize);
         return loader;
     }
 
-    private static class TestRDFDataUnit extends AbstractRDFDataUnit {
-        private final Repository repository;
-
-        public TestRDFDataUnit(Repository repository) throws RepositoryException, DataUnitException {
-            super("testDataUnit", FTDPUTestUtils.createHttpUri("writeContext").stringValue());
-            this.repository = repository;
-            RepositoryConnection connection = repository.getConnection();
-            RepositoryResult<Statement> statements = connection.getStatements(null, null, null, false);
-            while (statements.hasNext()) {
-                URI graphName = (URI) statements.next().getContext();
-                addExistingDataGraph(graphName.stringValue(), graphName);
-            }
-            statements.close();
-            connection.close();
+    private MockRDFDataUnit getDataUnit(Collection<Statement> statements) throws RepositoryException, DataUnitException {
+        MockRDFDataUnit rdfDataUnit = new MockRDFDataUnit(statements);
+        for (Statement statement : statements) {
+            URI graphName = (URI) statement.getContext();
+            rdfDataUnit.addExistingDataGraph(graphName.stringValue(), graphName);
         }
-
-        @Override
-        public RepositoryConnection getConnectionInternal() throws RepositoryException {
-            return repository.getConnection();
-        }
+        return rdfDataUnit;
     }
 }
