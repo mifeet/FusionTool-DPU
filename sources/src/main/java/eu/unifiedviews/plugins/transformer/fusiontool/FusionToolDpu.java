@@ -1,11 +1,9 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
-import ch.qos.logback.classic.Level;
 import com.google.common.collect.ImmutableList;
 import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionRunner;
-import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
 import cz.cuni.mff.odcleanstore.fusiontool.util.EnumFusionCounters;
 import cz.cuni.mff.odcleanstore.fusiontool.util.LDFusionToolUtils;
@@ -152,11 +150,11 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
     }
 
     private static void setLogLevel(boolean isDebugging) {
-        Level level = isDebugging ? Level.DEBUG : Level.INFO;
-        ch.qos.logback.classic.Logger logger1 = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(FusionToolDpu.class.getPackage().getName());
-        logger1.setLevel(level);
-        ch.qos.logback.classic.Logger logger2 = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName());
-        logger2.setLevel(level);
+        //Level level = isDebugging ? Level.DEBUG : Level.INFO;
+        //ch.qos.logback.classic.Logger logger1 = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(FusionToolDpu.class.getPackage().getName());
+        //logger1.setLevel(level);
+        //ch.qos.logback.classic.Logger logger2 = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ResourceDescriptionConflictResolver.class.getPackage().getName());
+        //logger2.setLevel(level);
     }
 
     private static void handleException(Exception e) throws DPUException {

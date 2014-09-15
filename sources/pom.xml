@@ -18,12 +18,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.java.version>1.7</project.java.version>
 
-        <odcs-cr-version>1.1.5</odcs-cr-version>
-        <odcsft-version>1.1-SNAPSHOT</odcsft-version>
-        <sesame-version>2.7.11</sesame-version>
-        <uv-version>1.0.0</uv-version>
-        
-        <odcs.version>1.3.0</odcs.version>
+        <odcs-cr.version>1.1.5</odcs-cr.version>
+        <odcsft.version>1.1-SNAPSHOT</odcsft.version>
+        <sesame.version>2.7.11</sesame.version>
+        <uv-devenv.version>1.0.0</uv-devenv.version>
+
         <!-- define used vaadin version !!! do not forget to update the version for OSGI's package export -->
 		<vaadin.version>7.1.8</vaadin.version>
 		<!-- the minimal required vaadin version The lowest Vaadin version accepted by DPUs. -->
@@ -55,35 +54,35 @@
         <dependency>
             <groupId>eu.unifiedviews</groupId>
             <artifactId>uv-dpu-api</artifactId>
-            <version>${uv-version}</version>
+            <version>${uv-devenv.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.unifiedviews</groupId>
             <artifactId>uv-dpu-api-helpers</artifactId>
-            <version>${uv-version}</version>
+            <version>${uv-devenv.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.unifiedviews</groupId>
             <artifactId>uv-dataunit-rdf</artifactId>
-            <version>${uv-version}</version>
+            <version>${uv-devenv.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.unifiedviews</groupId>
             <artifactId>uv-dataunit-files</artifactId>
-            <version>${uv-version}</version>
+            <version>${uv-devenv.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>eu.unifiedviews</groupId>
             <artifactId>uv-dataunit-helpers</artifactId>
-            <version>${uv-version}</version>
+            <version>${uv-devenv.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -99,14 +98,14 @@
         <dependency>
             <groupId>cz.cuni.mff.odcleanstore.fusiontool</groupId>
             <artifactId>odcsft-application</artifactId>
-            <version>${odcsft-version}</version>
+            <version>${odcsft.version}</version>
         </dependency>
 
         <!-- Old ODCleanStore dependencies -->
         <dependency>
             <groupId>cz.cuni.mff.odcleanstore</groupId>
             <artifactId>odcs-conflictresolution</artifactId>
-            <version>${odcs-cr-version}</version>
+            <version>${odcs-cr.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -118,7 +117,7 @@
         <dependency>
             <groupId>cz.cuni.mff.odcleanstore</groupId>
             <artifactId>odcs-core</artifactId>
-            <version>${odcs-cr-version}</version>
+            <version>${odcs-cr.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -131,31 +130,31 @@
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-rdfxml</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-trig</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-trix</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-n3</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-query</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -193,13 +192,13 @@
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-repository-sail</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sail-memory</artifactId>
-            <version>${sesame-version}</version>
+            <version>${sesame.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -233,7 +232,6 @@
                 	<!-- exclude dependencies provided by application -->
                     <excludeDependencies>
                         *;groupId=eu.unifiedviews
-                        *;groupId=cz.cuni.mff.xrg.odcs
                         ,*;groupId=com.vaadin
                         ,*;groupId=org.openrdf.sesame
                         ,org.slf4j
@@ -251,7 +249,7 @@
                         <Bundle-Description>${project.description}</Bundle-Description>
                         <Export-Package>${dpu.package};version="${project.version}"</Export-Package>
                         <Import-Package>
-                            cz.cuni.mff.xrg.odcs.*;version="${odcs.version}",com.vaadin.*;version="[${vaadin.version.min},
+                            eu.unifiedviews.*;version="${uv-devenv.version}",com.vaadin.*;version="[${vaadin.version.min},
                             ${vaadin.version.max})",*
                         </Import-Package>
                         <!-- dependencies embedding -->
