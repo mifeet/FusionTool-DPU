@@ -27,12 +27,17 @@ public class FusionToolConfig implements Serializable {
         this.xmlConfig = xmlConfig;
     }
 
-    /**
-     * Returns the XML configuration for DPU.
-     * @return XML configuration
-     */
+    // Config must provide public non-parametric constructor
+    public FusionToolConfig() {
+        this("");
+    }
+
     public String getXmlConfig() {
         return xmlConfig;
+    }
+
+    public void setXmlConfig(String xmlConfig) {
+        this.xmlConfig = xmlConfig;
     }
 
     public boolean isValid() {
