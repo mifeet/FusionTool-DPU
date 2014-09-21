@@ -21,6 +21,7 @@ import cz.cuni.mff.odcleanstore.core.ODCSUtils;
  * Implementation of {@link FileOutputWriter} writing to a formatted HTML document.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class HtmlFileOutputWriter implements FileOutputWriter {
     private static final String ENCODING = "UTF-8";
     private static final int MAX_LENGTH = 110;

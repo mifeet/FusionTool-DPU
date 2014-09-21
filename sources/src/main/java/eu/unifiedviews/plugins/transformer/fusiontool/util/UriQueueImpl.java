@@ -12,6 +12,7 @@ import eu.unifiedviews.plugins.transformer.fusiontool.io.LargeCollectionFactory;
  * Nodes other than resource URIs or blank nodes are discarded.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class UriQueueImpl implements UriQueue {
     private final Set<String> uriQueue;
 

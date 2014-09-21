@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
  * Note that calling size() on produced collections may not have constant time complexity!
  * @author Jan Michelfeit
  */
+@Deprecated
 public class MapdbCollectionFactory implements LargeCollectionFactory {
     private static final Logger LOG = LoggerFactory.getLogger(MapdbCollectionFactory.class);
     

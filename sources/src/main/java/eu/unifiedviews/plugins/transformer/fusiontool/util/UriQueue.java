@@ -4,6 +4,7 @@ package eu.unifiedviews.plugins.transformer.fusiontool.util;
  * Queue with URIs.
  * @author Jan Michelfeit
  */
+@Deprecated
 public interface UriQueue  {
     /**
      * Returns {@code true} if the collection has more elements.

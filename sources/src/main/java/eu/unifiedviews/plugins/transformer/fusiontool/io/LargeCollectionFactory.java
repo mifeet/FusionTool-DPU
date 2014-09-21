@@ -7,6 +7,7 @@ import java.util.Set;
  * Factory interface for potentially large collections. 
  * @author Jan Michelfeit
  */
+@Deprecated
 public interface LargeCollectionFactory  {
     /**
      * Creates a new {@link Set}.

@@ -6,6 +6,7 @@ import java.util.Map;
  * Utility class mapping namespace prefixes to SPARQL prefix declarations. 
  * @author Jan Michelfeit
  */
+@Deprecated
 public class PrefixDeclBuilderImpl implements PrefixDeclBuilder {
     private final String prefixDecl;
     

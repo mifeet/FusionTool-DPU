@@ -15,6 +15,7 @@ import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
  * regardless of named graphs.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class SesameFileOutputWriterTriple extends SesameFileOutputWriterBase {
     /**
      * @param rdfWriter handler or written RDF data

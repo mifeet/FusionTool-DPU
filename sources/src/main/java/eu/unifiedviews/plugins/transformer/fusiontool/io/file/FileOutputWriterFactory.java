@@ -26,6 +26,7 @@ import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuEx
  * Factory class for {@link FileOutputWriter} instances.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class FileOutputWriterFactory {
     private static final Logger LOG = LoggerFactory.getLogger(FileOutputWriterFactory.class);
 

@@ -6,6 +6,7 @@ package eu.unifiedviews.plugins.transformer.fusiontool.exceptions;
  *
  * @author Jan Michelfeit
  */
+@Deprecated
 public final class FusionToolDpuErrorCodes {
     /** Disable constructor for a utility class. */
     private FusionToolDpuErrorCodes() {

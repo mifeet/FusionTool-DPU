@@ -29,6 +29,7 @@ import java.util.List;
  * given owl:sameAs alternatives.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class QuadLoader {
     private static final Logger LOG = LoggerFactory.getLogger(QuadLoader.class);
 

@@ -15,6 +15,7 @@ import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
  * The writer must preserve IDs for blank nodes between write() calls.
  * @author Jan Michelfeit
  */
+@Deprecated
 public interface FileOutputWriter {
     /**
      * Write RDF data.

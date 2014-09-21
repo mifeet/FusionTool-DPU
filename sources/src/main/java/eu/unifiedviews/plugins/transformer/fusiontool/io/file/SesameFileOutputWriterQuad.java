@@ -22,6 +22,7 @@ import cz.cuni.mff.odcleanstore.vocabulary.ODCS;
  * and whether the data and metadata are written.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class SesameFileOutputWriterQuad extends SesameFileOutputWriterBase {
     private final URI dataContext;
     private final URI metadataContext;

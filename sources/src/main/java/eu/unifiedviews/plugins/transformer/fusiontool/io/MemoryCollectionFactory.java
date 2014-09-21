@@ -8,6 +8,7 @@ import java.util.Set;
  * Current implementation uses HashSet.
  * @author Jan Michelfeit
  */
+@Deprecated
 public class MemoryCollectionFactory implements LargeCollectionFactory {
     @Override
     public <T> Set<T> createSet() {

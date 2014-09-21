@@ -18,6 +18,7 @@ import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
  * Implementation of {@link FileOutputWriter} writing to a given Sesame {@link RDFHandler}.
  * @author Jan Michelfeit
  */
+@Deprecated
 public abstract class SesameFileOutputWriterBase implements FileOutputWriter {
     private final RDFHandler rdfWriter;
     private final Closeable underlyingResource;
