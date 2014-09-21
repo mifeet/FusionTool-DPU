@@ -4,6 +4,7 @@ import cz.cuni.mff.odcleanstore.conflictresolution.ConflictResolverFactory;
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionFunctionRegistry;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.ConflictResolutionPolicyImpl;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.DistanceMeasureImpl;
+import cz.cuni.mff.odcleanstore.conflictresolution.impl.util.EmptyMetadataModel;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.SourceQualityCalculator;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.impl.DecidingConflictFQualityCalculator;
 import cz.cuni.mff.odcleanstore.conflictresolution.quality.impl.ODCSSourceQualityCalculator;
@@ -39,6 +40,7 @@ import eu.unifiedviews.plugins.transformer.fusiontool.io.AllTriplesDataUnitLoade
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriter;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriterWithMetadata;
 import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitSameAsLinkLoader;
+import eu.unifiedviews.plugins.transformer.fusiontool.io.NoOpRDFWriter;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -147,6 +149,9 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
 
     @Override
     public Model getMetadata() throws LDFusionToolException {
+        if (metadataInput == null) {
+            return new EmptyMetadataModel();
+        }
         Model metadata = new TreeModel();
         RepositoryResult<Statement> metadataResult;
         try (CloseableRepositoryConnection connection = new CloseableRepositoryConnection(metadataInput.getConnection())) {
@@ -165,8 +170,10 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
         // FIXME: preference of prefixes from configuration
         Set<String> preferredURIs = getPreferredURIs();
         UriMappingIterableImpl uriMapping = new UriMappingIterableImpl(preferredURIs);
-        DataUnitSameAsLinkLoader sameAsLoader = new DataUnitSameAsLinkLoader(sameAsInput, config.getSameAsLinkTypes());
-        sameAsLoader.loadSameAsLinks(uriMapping);
+        if (sameAsInput != null) {
+            DataUnitSameAsLinkLoader sameAsLoader = new DataUnitSameAsLinkLoader(sameAsInput, config.getSameAsLinkTypes());
+            sameAsLoader.loadSameAsLinks(uriMapping);
+        }
         return uriMapping;
     }
 
@@ -196,9 +203,13 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
     @Override
     public CloseableRDFWriter getRDFWriter() throws IOException, LDFusionToolException {
         try {
-            return config.getWriteMetadata()
-                    ? new DataUnitRDFWriterWithMetadata(rdfOutput)
-                    : new DataUnitRDFWriter(rdfOutput);
+            if (rdfOutput == null) {
+                return new NoOpRDFWriter();
+            } else if (config.getWriteMetadata()) {
+                return new DataUnitRDFWriterWithMetadata(rdfOutput);
+            } else {
+                return new DataUnitRDFWriter(rdfOutput);
+            }
         } catch (DataUnitException e) {
             throw new LDFusionToolException("Error creating output writer", e);
         }

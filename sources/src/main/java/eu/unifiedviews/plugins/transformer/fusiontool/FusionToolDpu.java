@@ -1,6 +1,10 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionRunner;
@@ -28,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +42,7 @@ import java.util.Map;
  * Conflict resolution includes resolution of owl:sameAs link, resolution of instance-level conflicts.
  * @author Jan Michelfeit
  */
+// TODO: unit test, check null DataUnits
 @DPU.AsTransformer
 public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements ConfigDialogProvider<FusionToolConfig> {
     private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpu.class);
@@ -113,7 +119,9 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         LOG.info("Starting data fusion, this may take a while...");
 
         try {
-            List<RDFDataUnit> rdfInputs = ImmutableList.of(rdfInput, rdfInput2);
+            List<RDFDataUnit> rdfInputs = FluentIterable.from(Arrays.asList(rdfInput, rdfInput2))
+                    .filter(Predicates.notNull())
+                    .toList();
 
             // Execute data fusion
             FusionToolDpuComponentFactory componentFactory = new FusionToolDpuComponentFactory(
@@ -130,7 +138,6 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
             if (configContainer.isProfilingOn()) {
                 printProfilingInformation(componentFactory, runner);
             }
-
         } catch (ConflictResolutionException | IOException | LDFusionToolException e) {
             handleException(e);
         }
