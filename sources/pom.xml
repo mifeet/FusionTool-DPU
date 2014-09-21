@@ -20,33 +20,33 @@
 
         <odcs-cr.version>1.1.5</odcs-cr.version>
         <odcsft.version>1.1-SNAPSHOT</odcsft.version>
-        <sesame.version>2.7.11</sesame.version>
+        <sesame.version>2.7.13</sesame.version>
         <uv-devenv.version>1.0.1</uv-devenv.version>
 
         <!-- define used vaadin version !!! do not forget to update the version for OSGI's package export -->
-		<vaadin.version>7.1.8</vaadin.version>
-		<!-- the minimal required vaadin version The lowest Vaadin version accepted by DPUs. -->
-		<vaadin.version.min>7.1.8</vaadin.version.min>
-		<!-- max vaadin version accepted be DPUs The highest Vaadin version accepted by DPUs. -->
-		<vaadin.version.max>8.0.0</vaadin.version.max>
+        <vaadin.version>7.1.8</vaadin.version>
+        <!-- the minimal required vaadin version The lowest Vaadin version accepted by DPUs. -->
+        <vaadin.version.min>7.1.8</vaadin.version.min>
+        <!-- max vaadin version accepted be DPUs The highest Vaadin version accepted by DPUs. -->
+        <vaadin.version.max>8.0.0</vaadin.version.max>
     </properties>
 
     <repositories>
-		<repository>
-			<id>cz.cuni.mff.ms.xrg.odcs</id>
-			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/groups/public/</url>
-		</repository>
-		
-		<repository>
-			<id>cz.cuni.mff.ms.xrg.odcs.thirdparty</id>
-			<url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
-		</repository>
+        <repository>
+            <id>cz.cuni.mff.ms.xrg.odcs</id>
+            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/groups/public/</url>
+        </repository>
 
-		<repository>
-			<id>maven.eea.sk</id>
-			<name>maven.eea.sk-public</name>
-			<url>http://maven.eea.sk/artifactory/public/</url>
-		</repository>
+        <repository>
+            <id>cz.cuni.mff.ms.xrg.odcs.thirdparty</id>
+            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
+        </repository>
+
+        <repository>
+            <id>maven.eea.sk</id>
+            <name>maven.eea.sk-public</name>
+            <url>http://maven.eea.sk/artifactory/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -129,6 +129,17 @@
         <!-- Sesame -->
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-runtime</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-nquads</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-rdfxml</artifactId>
             <version>${sesame.version}</version>
             <scope>provided</scope>
@@ -151,11 +162,16 @@
             <version>${sesame.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-query</artifactId>
+            <artifactId>sesame-rio-datatypes</artifactId>
             <version>${sesame.version}</version>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-languages</artifactId>
+            <version>${sesame.version}</version>
         </dependency>
 
         <!-- Other -->
@@ -204,7 +220,6 @@
     </dependencies>
 
 
-
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -229,18 +244,22 @@
                 <version>2.3.7</version>
                 <extensions>true</extensions>
                 <configuration>
-                	<!-- exclude dependencies provided by application -->
+                    <!-- exclude dependencies provided by application -->
                     <excludeDependencies>
                         *;groupId=eu.unifiedviews
                         ,*;groupId=com.vaadin
-                        <!--,*;groupId=org.openrdf.sesame-->
                         ,org.slf4j
-                        
+
                         <!-- add any new application provided library here ... -->
-						,*;groupId=com.h2database
-						,*;groupId=org.eclipse.persistence
-						,*;groupId=org.eclipse.tycho
-						,*;groupId=mysql
+                        ,*;groupId=com.h2database
+                        ,*;groupId=org.eclipse.persistence
+                        ,*;groupId=org.eclipse.tycho
+                        ,*;groupId=mysql
+                        ,*;groupId=org.openrdf.*;version=!${sesame.version}
+                        ,sesame-model;groupId=org.openrdf.sesame
+                        ,sesame-repository-api;groupId=org.openrdf.sesame
+                        ,sesame-core;groupId=org.openrdf.sesame
+                        ,sesame-query;groupId=org.openrdf.sesame
                     </excludeDependencies>
                     <instructions>
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
@@ -264,10 +283,10 @@
                         <!-- Current Vaadin version -->
                         <Vaadin-Version>${vaadin.version}</Vaadin-Version>
                         <Build-Time>${maven.build.timestamp}</Build-Time>
-                        
+
                         <!-- using true cause adding new imports for new packages !! -->
                         <Embed-Transitive>true</Embed-Transitive>
-                    </instructions> 
+                    </instructions>
                 </configuration>
             </plugin>
 
