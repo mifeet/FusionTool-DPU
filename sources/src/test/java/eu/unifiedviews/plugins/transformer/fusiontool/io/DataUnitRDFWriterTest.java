@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolvedStatementImpl;
 import eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit;
+import eu.unifiedviews.plugins.transformer.fusiontool.config.FTConfigConstants;
 import eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -33,7 +34,8 @@ public class DataUnitRDFWriterTest {
         when(dataUnit.getBaseDataGraphURI()).thenReturn(DEFAULT_CONTEXT);
         connection = repository.getConnection();
         when(dataUnit.getConnection()).thenReturn(connection);
-        writer = new DataUnitRDFWriter(dataUnit);
+        when(dataUnit.addNewDataGraph(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME)).thenReturn(DEFAULT_CONTEXT);
+        writer = new DataUnitRDFWriter(dataUnit, FTConfigConstants.DEFAULT_DATA_GRAPH_NAME);
     }
 
     @After
@@ -72,7 +74,7 @@ public class DataUnitRDFWriterTest {
         when(dataUnit.getBaseDataGraphURI()).thenReturn(DEFAULT_CONTEXT);
         RepositoryConnection connection = mock(RepositoryConnection.class);
         when(dataUnit.getConnection()).thenReturn(connection);
-        writer = new DataUnitRDFWriter(dataUnit);
+        writer = new DataUnitRDFWriter(dataUnit, FTConfigConstants.DEFAULT_DATA_GRAPH_NAME);
 
         // Act
         writer.close();

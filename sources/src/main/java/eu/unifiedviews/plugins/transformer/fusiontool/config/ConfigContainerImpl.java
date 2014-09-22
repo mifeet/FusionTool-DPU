@@ -5,7 +5,12 @@ import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolutionStrategyImpl;
 import org.openrdf.model.URI;
 import org.openrdf.rio.ParserConfig;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Container of configuration values.
@@ -23,6 +28,8 @@ public class ConfigContainerImpl implements ConfigContainer {
     private Long memoryLimit = null;
     private URI requiredClassOfProcessedResources = null;
     private ParserConfig parserConfig = FTConfigConstants.DEFAULT_FILE_PARSER_CONFIG;
+    private String dataGraphSymbolicName = FTConfigConstants.DEFAULT_DATA_GRAPH_NAME;
+    private String metadataGraphSymbolicName = FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME;
 
     @Override
     public String getResultDataURIPrefix() { // TODO: settable in XML configuration
@@ -220,5 +227,25 @@ public class ConfigContainerImpl implements ConfigContainer {
      */
     public void setMaxOutputTriples(Long maxOutputTriples) {
         this.maxOutputTriples = maxOutputTriples;
+    }
+
+    @Override
+    public String getDataGraphSymbolicName() {
+        return dataGraphSymbolicName;
+    }
+
+    public void setDataGraphSymbolicName(String dataGraphSymbolicName) {
+        // FIXME: set from configuration
+        this.dataGraphSymbolicName = dataGraphSymbolicName;
+    }
+
+    @Override
+    public String getMetadataGraphSymbolicName() {
+        return metadataGraphSymbolicName;
+    }
+
+    public void setMetadataGraphSymbolicName(String metadataGraphSymbolicName) {
+        // FIXME: set from configuration
+        this.metadataGraphSymbolicName = metadataGraphSymbolicName;
     }
 }

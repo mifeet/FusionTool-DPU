@@ -9,6 +9,7 @@ import cz.cuni.mff.odcleanstore.conflictresolution.impl.util.EmptyMetadataModel;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionComponentFactory;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionExecutor;
 import cz.cuni.mff.odcleanstore.fusiontool.LDFusionToolExecutor;
+import cz.cuni.mff.odcleanstore.fusiontool.config.LDFTConfigConstants;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescription;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.impl.NestedResourceDescriptionResolution;
@@ -167,6 +168,8 @@ public class FusionToolDpuComponentFactoryTest {
     public void getsTripleRDFWriterWhenWritingMetadataIsDisabled() throws Exception {
         ConfigContainer config = mock(ConfigContainer.class);
         when(config.getWriteMetadata()).thenReturn(false);
+        when(config.getDataGraphSymbolicName()).thenReturn(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME);
+        when(config.getMetadataGraphSymbolicName()).thenReturn(FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME);
 
         // Act
         FusionToolDpuComponentFactory componentFactory = getComponentFactory(config);
@@ -178,8 +181,9 @@ public class FusionToolDpuComponentFactoryTest {
             writer.write(resolvedStatement);
 
             Statement actualStatement = Iterables.getOnlyElement(outputDataUnit.getAllStatements());
+            Resource dataGraph = outputDataUnit.addNewDataGraph(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME);
             MatcherAssert.assertThat(actualStatement, is(statement));
-            MatcherAssert.assertThat(actualStatement.getContext(), is((Resource) outputDataUnit.getDataGraphURI()));
+            MatcherAssert.assertThat(actualStatement.getContext(), is(dataGraph));
             outputDataUnit.getAllStatements();
         }
     }
@@ -188,6 +192,8 @@ public class FusionToolDpuComponentFactoryTest {
     public void getsQuadRDFWriterWhenWritingMetadataIsEnabled() throws Exception {
         ConfigContainer config = mock(ConfigContainer.class);
         when(config.getWriteMetadata()).thenReturn(true);
+        when(config.getDataGraphSymbolicName()).thenReturn(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME);
+        when(config.getMetadataGraphSymbolicName()).thenReturn(FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME);
 
         // Act
         FusionToolDpuComponentFactory componentFactory = getComponentFactory(config);
@@ -198,13 +204,13 @@ public class FusionToolDpuComponentFactoryTest {
             ResolvedStatement resolvedStatement = new ResolvedStatementImpl(statement, 0.5, ImmutableList.of((Resource) createHttpUri("source1")));
             writer.write(resolvedStatement);
 
-            URI metadataGraph = outputDataUnit.addNewDataGraph(DataUnitRDFWriterWithMetadata.METADATA_GRAPH_NAME);
-            URI resultGraph = Iterables.getOnlyElement(Sets.difference(Sets.newHashSet(outputDataUnit.getAddedGraphs().values()), ImmutableSet.of(metadataGraph)));
+            URI metadataGraph = outputDataUnit.addNewDataGraph(FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME);
+            URI statementGraph = outputDataUnit.addNewDataGraph(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME + "-1");
 
             List<Statement> expectedStatements = ImmutableList.of(
-                    VF.createStatement(statement.getSubject(), statement.getPredicate(), statement.getObject(), resultGraph),
-                    VF.createStatement(resultGraph, ODCS.QUALITY, VF.createLiteral(0.5), metadataGraph),
-                    VF.createStatement(resultGraph, ODCS.SOURCE_GRAPH, createHttpUri("source1"), metadataGraph)
+                    VF.createStatement(statement.getSubject(), statement.getPredicate(), statement.getObject(), statementGraph),
+                    VF.createStatement(statementGraph, ODCS.QUALITY, VF.createLiteral(0.5), metadataGraph),
+                    VF.createStatement(statementGraph, ODCS.SOURCE_GRAPH, createHttpUri("source1"), metadataGraph)
             );
             List<Statement> actualStatements = outputDataUnit.getAllStatements();
             MatcherAssert.assertThat(actualStatements, containsInAnyOrder(Lists.transform(expectedStatements, STATEMENT_TO_MATCHER)));

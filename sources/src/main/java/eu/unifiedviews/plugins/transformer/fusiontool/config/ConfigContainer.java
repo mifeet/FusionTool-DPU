@@ -32,4 +32,18 @@ public interface ConfigContainer extends ConfigData, ConfigProcessing, ConfigQua
      * @return true if the output should contain metadata, false if no metadata are written to the output.
      */
     boolean getWriteMetadata();
+
+    /**
+     * Symbolic name of the data graph where output triples are written.
+     * @return symbolic name of the output data graph
+     * @see eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit#addNewDataGraph(String)
+     */
+    String getDataGraphSymbolicName();
+
+    /**
+     * Symbolic name of the graph where output metadata are written.
+     * @return symbolic name of the output metadata graph
+     * @see eu.unifiedviews.dataunit.rdf.WritableRDFDataUnit#addNewDataGraph(String)
+     */
+    String getMetadataGraphSymbolicName();
 }

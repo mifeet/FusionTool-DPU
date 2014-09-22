@@ -208,9 +208,9 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
             if (rdfOutput == null) {
                 return new NoOpRDFWriter();
             } else if (config.getWriteMetadata()) {
-                return new DataUnitRDFWriterWithMetadata(rdfOutput);
+                return new DataUnitRDFWriterWithMetadata(rdfOutput, config.getDataGraphSymbolicName(), config.getMetadataGraphSymbolicName());
             } else {
-                return new DataUnitRDFWriter(rdfOutput);
+                return new DataUnitRDFWriter(rdfOutput, config.getDataGraphSymbolicName());
             }
         } catch (DataUnitException e) {
             throw new LDFusionToolException("Error creating output writer", e);

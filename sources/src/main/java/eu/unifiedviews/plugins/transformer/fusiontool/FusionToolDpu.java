@@ -115,12 +115,12 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         long startTime = System.currentTimeMillis();
         LOG.info("Starting data fusion, this may take a while...");
 
+        // Execute data fusion
         try {
             List<RDFDataUnit> rdfInputs = FluentIterable.from(Arrays.asList(rdfInput, rdfInput2))
                     .filter(Predicates.notNull())
                     .toList();
 
-            // Execute data fusion
             FusionToolDpuComponentFactory componentFactory = new FusionToolDpuComponentFactory(
                     configContainer,
                     context,

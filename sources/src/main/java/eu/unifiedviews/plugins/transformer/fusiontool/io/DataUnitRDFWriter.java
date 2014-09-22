@@ -15,9 +15,9 @@ public class DataUnitRDFWriter extends CloseableRDFWriterBase {
     private final RepositoryConnection connection;
     private final URI context;
 
-    public DataUnitRDFWriter(WritableRDFDataUnit dataUnit) throws DataUnitException {
+    public DataUnitRDFWriter(WritableRDFDataUnit dataUnit, String dataGraphSymbolicName) throws DataUnitException {
         this.connection = dataUnit.getConnection();
-        context = dataUnit.getBaseDataGraphURI();
+        context = dataUnit.addNewDataGraph(dataGraphSymbolicName);
     }
 
     @Override

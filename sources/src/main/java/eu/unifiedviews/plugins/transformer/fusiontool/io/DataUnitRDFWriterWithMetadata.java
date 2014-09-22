@@ -16,20 +16,21 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DataUnitRDFWriterWithMetadata extends CloseableRDFWriterBase {
-    public static final String DATA_GRAPH_NAME_PREFIX = "result-";
-    public static final String METADATA_GRAPH_NAME = "metadata";
+    public static final String DATA_GRAPH_NAME_INFIX = "-";
     private final RepositoryConnection connection;
     private final URI defaultContext;
     private final WritableRDFDataUnit dataUnit;
+    private final String dataGraphSymbolicName;
     private final URI metadataContext;
     private final AtomicLong counter = new AtomicLong(0);
     private final ValueFactory valueFactory;
 
-    public DataUnitRDFWriterWithMetadata(WritableRDFDataUnit dataUnit) throws DataUnitException {
+    public DataUnitRDFWriterWithMetadata(WritableRDFDataUnit dataUnit, String dataGraphSymbolicName, String metadataGraphSymbolicName) throws DataUnitException {
         this.dataUnit = dataUnit;
+        this.dataGraphSymbolicName = dataGraphSymbolicName;
         connection = dataUnit.getConnection();
-        defaultContext = dataUnit.getBaseDataGraphURI();
-        metadataContext = dataUnit.addNewDataGraph(METADATA_GRAPH_NAME);
+        defaultContext = dataUnit.addNewDataGraph(dataGraphSymbolicName);
+        metadataContext = dataUnit.addNewDataGraph(metadataGraphSymbolicName);
         valueFactory = connection.getValueFactory();
     }
 
@@ -45,7 +46,7 @@ public class DataUnitRDFWriterWithMetadata extends CloseableRDFWriterBase {
     @Override
     public void write(ResolvedStatement resolvedStatement) throws IOException {
         try {
-            URI statementContext = dataUnit.addNewDataGraph(DATA_GRAPH_NAME_PREFIX + Long.toString(counter.incrementAndGet()));
+            URI statementContext = dataUnit.addNewDataGraph(dataGraphSymbolicName + DATA_GRAPH_NAME_INFIX + Long.toString(counter.incrementAndGet()));
             connection.add(resolvedStatement.getStatement(), statementContext);
             connection.add(statementContext, ODCS.QUALITY, valueFactory.createLiteral(resolvedStatement.getQuality()), metadataContext);
             for (Resource sourceGraph : resolvedStatement.getSourceGraphNames()) {

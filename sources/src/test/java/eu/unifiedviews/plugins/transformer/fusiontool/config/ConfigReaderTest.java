@@ -67,6 +67,8 @@ public class ConfigReaderTest {
         assertThat(config.getFileOutputs(), is(Collections.<FileOutput>emptyList()));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
         assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
+        assertThat(config.getDataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME));
+        assertThat(config.getMetadataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME));
     }
 
     @Test
@@ -126,6 +128,8 @@ public class ConfigReaderTest {
         assertThat(config.getCanonicalURIsFileName(), is(FTConfigConstants.CANONICAL_URI_FILE_NAME));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
         assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
+        assertThat(config.getDataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME));
+        assertThat(config.getMetadataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME));
     }
 
     @Test
@@ -163,6 +167,8 @@ public class ConfigReaderTest {
         assertThat(config.getFileOutputs(), is(Collections.<FileOutput>emptyList()));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
         assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
+        assertThat(config.getDataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME));
+        assertThat(config.getMetadataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_METADATA_GRAPH_NAME));
     }
 
     @Test(expected = InvalidInputException.class)

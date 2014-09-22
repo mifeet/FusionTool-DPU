@@ -72,5 +72,6 @@ public final class FTConfigConstants {
     public static final boolean ENABLE_FILE_CACHE = false;
     public static final long MAX_MEMORY_LIMIT = 3 * LDFusionToolUtils.GB_BYTES; // FIXME: make configurable
     public static final boolean WRITE_METADATA = false; // TODO: make configurable
-
+    public static final String DEFAULT_DATA_GRAPH_NAME = "data";
+    public static final String DEFAULT_METADATA_GRAPH_NAME = "metadata";
 }
