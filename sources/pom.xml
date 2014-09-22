@@ -7,7 +7,7 @@
     <groupId>eu.unifiedviews.plugins</groupId>
     <artifactId>uv-t-fusionTool</artifactId>
     <name>T-FusionTool</name>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.3.0</version>
     <packaging>bundle</packaging>
     <description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</description>
 
@@ -19,7 +19,7 @@
         <project.java.version>1.7</project.java.version>
 
         <odcs-cr.version>1.1.5</odcs-cr.version>
-        <odcsft.version>1.1-SNAPSHOT</odcsft.version>
+        <odcsft.version>1.1.0</odcsft.version>
         <sesame.version>2.7.13</sesame.version>
         <uv-devenv.version>1.0.1</uv-devenv.version>
 
