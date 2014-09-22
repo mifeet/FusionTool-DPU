@@ -2,9 +2,6 @@ package eu.unifiedviews.plugins.transformer.fusiontool;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import cz.cuni.mff.odcleanstore.conflictresolution.exceptions.ConflictResolutionException;
 import cz.cuni.mff.odcleanstore.core.ODCSUtils;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionRunner;

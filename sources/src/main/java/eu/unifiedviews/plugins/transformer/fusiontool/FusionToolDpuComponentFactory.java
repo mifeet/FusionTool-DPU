@@ -94,13 +94,15 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
 
     @Override
     public FusionExecutor getExecutor(UriMappingIterable uriMapping) {
-        return new LDFusionToolExecutor(
+        LDFusionToolExecutor executor = new LDFusionToolExecutor(
                 true,
                 config.getMaxOutputTriples(),
                 getInputFilter(uriMapping),
                 executorTimeProfiler,
                 executorMemoryProfiler
         );
+        executor.setIsCanceledCallback(new DPUContextIsCanceledCallback(executionContext));
+        return executor;
     }
 
     @Override
