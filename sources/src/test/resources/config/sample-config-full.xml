@@ -21,12 +21,4 @@
             <Param name="name" value="value"/>
         </ResolutionStrategy>
     </ConflictResolution>
-
-  <FileOutputs maxResolvedQuads="999">
-  	<FileOutput
-	  path="output/out.n3" 
-	  format="ntriples" 
-	  dataContext="http://example.com/result" 
-	  metadataContext="http://example.com/metadata" />
-  </FileOutputs>
 </Config>

@@ -25,7 +25,13 @@ import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.FederatedResourceDescri
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.MappedResourceFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.RequiredClassFilter;
 import cz.cuni.mff.odcleanstore.fusiontool.loaders.fiter.ResourceDescriptionFilter;
-import cz.cuni.mff.odcleanstore.fusiontool.util.*;
+import cz.cuni.mff.odcleanstore.fusiontool.util.CanonicalUriFileHelper;
+import cz.cuni.mff.odcleanstore.fusiontool.util.CloseableRepositoryConnection;
+import cz.cuni.mff.odcleanstore.fusiontool.util.DPUContextIsCanceledCallback;
+import cz.cuni.mff.odcleanstore.fusiontool.util.EnumFusionCounters;
+import cz.cuni.mff.odcleanstore.fusiontool.util.LDFusionToolUtils;
+import cz.cuni.mff.odcleanstore.fusiontool.util.MemoryProfiler;
+import cz.cuni.mff.odcleanstore.fusiontool.util.ProfilingTimeCounter;
 import cz.cuni.mff.odcleanstore.fusiontool.writers.CloseableRDFWriter;
 import cz.cuni.mff.odcleanstore.fusiontool.writers.NoOpUriMappingWriter;
 import cz.cuni.mff.odcleanstore.fusiontool.writers.UriMappingWriter;
@@ -50,7 +56,13 @@ import org.openrdf.repository.RepositoryResult;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Fuses RDF data from input using ODCS Conflict Resolution and writes the output to RDF outputs.
@@ -261,8 +273,14 @@ public class FusionToolDpuComponentFactory implements FusionComponentFactory {
         return executorTimeProfiler;
     }
 
-    private File getCanonicalUrisFile() {
-        return new File(executionContext.getResultDir(), config.getCanonicalURIsFileName());
+    private File getCanonicalUrisFile() throws IOException {
+        // FIXME: use file DPU
+        try {
+            java.net.URI dirUri = new java.net.URI(executionContext.getDpuInstanceDirectory());
+            return new File(dirUri.toURL().getPath(), config.getCanonicalURIsFileName());
+        } catch (URISyntaxException | MalformedURLException e) {
+            throw new IOException(e);
+        }
     }
 
     private long calculateMemoryLimit() {

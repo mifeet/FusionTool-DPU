@@ -1,6 +1,10 @@
 package eu.unifiedviews.plugins.transformer.fusiontool;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionStrategy;
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolvedStatement;
 import cz.cuni.mff.odcleanstore.conflictresolution.impl.ResolutionStrategyImpl;
@@ -9,7 +13,6 @@ import cz.cuni.mff.odcleanstore.conflictresolution.impl.util.EmptyMetadataModel;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionComponentFactory;
 import cz.cuni.mff.odcleanstore.fusiontool.FusionExecutor;
 import cz.cuni.mff.odcleanstore.fusiontool.LDFusionToolExecutor;
-import cz.cuni.mff.odcleanstore.fusiontool.config.LDFTConfigConstants;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescription;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.ResourceDescriptionConflictResolver;
 import cz.cuni.mff.odcleanstore.fusiontool.conflictresolution.impl.NestedResourceDescriptionResolution;
@@ -27,7 +30,6 @@ import eu.unifiedviews.dpu.DPUContext;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainerImpl;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.FTConfigConstants;
-import eu.unifiedviews.plugins.transformer.fusiontool.io.DataUnitRDFWriterWithMetadata;
 import eu.unifiedviews.plugins.transformer.fusiontool.util.MockRDFDataUnit;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
@@ -54,11 +56,18 @@ import java.util.Map;
 
 import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.ContextAwareStatementIsEqual.STATEMENT_TO_MATCHER;
 import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.ContextAwareStatementIsEqual.contextAwareStatementIsEqual;
-import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils.*;
+import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils.createHttpStatement;
+import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils.createHttpUri;
+import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils.createStatement;
+import static eu.unifiedviews.plugins.transformer.fusiontool.testutils.FTDPUTestUtils.getUniqueURI;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -134,7 +143,8 @@ public class FusionToolDpuComponentFactoryTest {
     public void getFileWritingCanonicalUriWriterWhenCanonicalUriFileIsGiven() throws Exception {
         File outputFile = testDir.newFile();
         ConfigContainer config = mock(ConfigContainer.class);
-        when(config.getCanonicalURIsFileName()).thenReturn(outputFile.getAbsolutePath());
+        when(config.getCanonicalURIsFileName()).thenReturn(outputFile.getName());
+        when(dpuContext.getDpuInstanceDirectory()).thenReturn(testDir.getRoot().toURI().toString());
 
         FusionToolDpuComponentFactory componentFactory = getComponentFactory(config);
         UriMappingWriter writer = componentFactory.getCanonicalUriWriter(uriMapping);
@@ -229,8 +239,8 @@ public class FusionToolDpuComponentFactoryTest {
                 VF.createStatement(createHttpUri("p2"), OWL.SAMEAS, createHttpUri("p3"))
         ));
 
-        File resultDir = testDir.newFolder("result");
-        when(dpuContext.getResultDir()).thenReturn(resultDir);
+        File resultDir = testDir.newFolder("dpuInstanceDir");
+        when(dpuContext.getDpuInstanceDirectory()).thenReturn(resultDir.toURI().toString());
 
         ConfigContainer config = mock(ConfigContainer.class);
         when(config.getSameAsLinkTypes()).thenReturn(ImmutableSet.of(OWL.SAMEAS));
@@ -271,7 +281,8 @@ public class FusionToolDpuComponentFactoryTest {
         assertThat(typedExecutor.getMaxOutputTriples(), is(101L));
         ResourceDescriptionFilter filter = typedExecutor.getResourceDescriptionFilter();
         assertTrue(filter.accept(new ResourceDescriptionImpl(createHttpUri("r1"), ImmutableList.of(createHttpStatement("r1", "p", "o")))));
-        assertTrue(filter.accept(new ResourceDescriptionImpl(createHttpUri("r2"), ImmutableList.of(VF.createStatement(createHttpUri("r2"), RDF.TYPE, createHttpUri("o"))))));
+        assertTrue(filter.accept(new ResourceDescriptionImpl(createHttpUri("r2"),
+                ImmutableList.of(VF.createStatement(createHttpUri("r2"), RDF.TYPE, createHttpUri("o"))))));
         assertTrue(filter.accept(new ResourceDescriptionImpl(createHttpUri("a2"), ImmutableList.of(createHttpStatement("a2", "p", "o")))));
     }
 
@@ -292,9 +303,11 @@ public class FusionToolDpuComponentFactoryTest {
         assertThat(typedExecutor.getMaxOutputTriples(), is(101L));
         ResourceDescriptionFilter filter = typedExecutor.getResourceDescriptionFilter();
         assertFalse(filter.accept(new ResourceDescriptionImpl(createHttpUri("r1"), ImmutableList.of(createHttpStatement("r1", "p", "o")))));
-        assertFalse(filter.accept(new ResourceDescriptionImpl(createHttpUri("r2"), ImmutableList.of(VF.createStatement(createHttpUri("r2"), RDF.TYPE, createHttpUri("c"))))));
+        assertFalse(filter.accept(new ResourceDescriptionImpl(createHttpUri("r2"),
+                ImmutableList.of(VF.createStatement(createHttpUri("r2"), RDF.TYPE, createHttpUri("c"))))));
         assertFalse(filter.accept(new ResourceDescriptionImpl(createHttpUri("a2"), ImmutableList.of(createHttpStatement("a2", "p", "o")))));
-        assertTrue(filter.accept(new ResourceDescriptionImpl(createHttpUri("b2"), ImmutableList.of(VF.createStatement(createHttpUri("b2"), RDF.TYPE, createHttpUri("c"))))));
+        assertTrue(filter.accept(new ResourceDescriptionImpl(createHttpUri("b2"),
+                ImmutableList.of(VF.createStatement(createHttpUri("b2"), RDF.TYPE, createHttpUri("c"))))));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -383,5 +396,4 @@ public class FusionToolDpuComponentFactoryTest {
     private FusionToolDpuComponentFactory getComponentFactory(ConfigContainer config) {
         return new FusionToolDpuComponentFactory(config, dpuContext, rdfInputs, sameAsDataUnit, metadataDataUnit, outputDataUnit);
     }
-
 }

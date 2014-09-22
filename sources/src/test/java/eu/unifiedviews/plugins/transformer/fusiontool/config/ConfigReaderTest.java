@@ -2,24 +2,24 @@ package eu.unifiedviews.plugins.transformer.fusiontool.config;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 import cz.cuni.mff.odcleanstore.conflictresolution.EnumAggregationErrorStrategy;
 import cz.cuni.mff.odcleanstore.conflictresolution.EnumCardinality;
 import cz.cuni.mff.odcleanstore.conflictresolution.ResolutionStrategy;
-import cz.cuni.mff.odcleanstore.fusiontool.io.EnumSerializationFormat;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
 import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.RDFS;
 
-import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class ConfigReaderTest {
@@ -64,7 +64,6 @@ public class ConfigReaderTest {
         assertThat(config.getParserConfig(), equalTo(FTConfigConstants.DEFAULT_FILE_PARSER_CONFIG));
 
         assertThat(config.getCanonicalURIsFileName(), is(FTConfigConstants.CANONICAL_URI_FILE_NAME));
-        assertThat(config.getFileOutputs(), is(Collections.<FileOutput>emptyList()));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
         assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
         assertThat(config.getDataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME));
@@ -86,13 +85,7 @@ public class ConfigReaderTest {
                 "fb", "http://rdf.freebase.com/ns/");
         assertThat(config.getPrefixes(), equalTo(expectedPrefixes));
 
-        FileOutput fileOutput = Iterables.getOnlyElement(config.getFileOutputs());
-        assertThat(fileOutput.getPath(), is(new File("output", "out.n3")));
-        assertThat(fileOutput.getFormat(), is(EnumSerializationFormat.N3));
-        assertThat(fileOutput.getDataContext(), is((URI) new URIImpl("http://example.com/result")));
-        assertThat(fileOutput.getMetadataContext(), is((URI) new URIImpl("http://example.com/metadata")));
-
-        assertThat(config.getMaxOutputTriples(), equalTo(999L));
+        assertThat(config.getMaxOutputTriples(), nullValue());
         assertThat(config.getEnableFileCache(), equalTo(false));
         assertThat(config.isLocalCopyProcessing(), equalTo(true));
         assertThat(config.getRequiredClassOfProcessedResources(), equalTo((URI) new URIImpl("http://schema.org/PostalAddress")));
@@ -164,7 +157,6 @@ public class ConfigReaderTest {
         assertThat(config.getParserConfig(), equalTo(FTConfigConstants.DEFAULT_FILE_PARSER_CONFIG));
 
         assertThat(config.getCanonicalURIsFileName(), is(FTConfigConstants.CANONICAL_URI_FILE_NAME));
-        assertThat(config.getFileOutputs(), is(Collections.<FileOutput>emptyList()));
         assertThat(config.getSameAsLinkTypes(), is(FTConfigConstants.SAME_AS_LINK_TYPES));
         assertThat(config.getWriteMetadata(), is(FTConfigConstants.WRITE_METADATA));
         assertThat(config.getDataGraphSymbolicName(), is(FTConfigConstants.DEFAULT_DATA_GRAPH_NAME));

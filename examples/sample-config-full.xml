@@ -35,18 +35,4 @@
     </ResolutionStrategy>
   </ConflictResolution>
 
-  <!-- Definitions of file outputs; multiple <FileOutput> children may be given; (optional)
-       'maxResolvedQuads' attribute specifies maximum number of output resolved quads to be written (optional) -->
-  <FileOutputs maxResolvedQuads="1000">
-  	<!-- Definition of output to a file; 
-  	     'path' attribute specifies path to the output (required),
-  	     'format' attribute specifies serialization format - accepted formats are 'html', 'ntriples', 'trig' and 'rdf/xml' (required),
-  	     'dataContext' specifies URI of named graph where resolved quads will be placed in the output (optional),
-  	     'metadataContext' specifies URI of named graph where Conflict Resolution metadata will be placed in the output (optional) -->
-  	<FileOutput 
-	  path="output/out.n3" 
-	  format="ntriples" 
-	  dataContext="http://example.com/result" 
-	  metadataContext="http://example.com/metadata" />
-  </FileOutputs>
 </Config>

@@ -6,7 +6,6 @@ import cz.cuni.mff.odcleanstore.fusiontool.exceptions.LDFusionToolException;
 import cz.cuni.mff.odcleanstore.fusiontool.util.CloseableRepositoryConnection;
 import eu.unifiedviews.dataunit.DataUnitException;
 import eu.unifiedviews.dataunit.rdf.RDFDataUnit;
-import eu.unifiedviews.plugins.transformer.fusiontool.FusionToolDpuExecutor;
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.URI;
 import org.openrdf.query.GraphQueryResult;
@@ -21,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 
 public class DataUnitSameAsLinkLoader {
-    private static final Logger LOG = LoggerFactory.getLogger(FusionToolDpuExecutor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataUnitSameAsLinkLoader.class);
     private static RDFDataUnit dataUnit;
     private static Set<URI> sameAsLinkTypes;
 
