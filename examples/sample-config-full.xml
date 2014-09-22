@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Config>
+  <!-- Definitions of namespace prefixes which can be used throughout the configuration. -->
+  <Prefixes>
+    <Prefix id="rdf" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" />
+    <Prefix id="rdfs" namespace="http://www.w3.org/2000/01/rdf-schema#" />
+  </Prefixes>
+
   <!-- Definition of data processing settings; (optional) -->
   <DataProcessing>
     <!-- If not empty, only resources of the given (RDFS/OWL) class will be processed;
