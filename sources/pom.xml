@@ -7,7 +7,7 @@
     <groupId>eu.unifiedviews.plugins</groupId>
     <artifactId>uv-t-fusionTool</artifactId>
     <name>T-FusionTool</name>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.3.1</version>
     <packaging>bundle</packaging>
     <description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</description>
 
