@@ -3,13 +3,13 @@
  */
 package eu.unifiedviews.plugins.transformer.fusiontool.config.xml;
 
-import java.util.List;
-
 import cz.cuni.mff.odcleanstore.fusiontool.config.xml.ConflictResolutionXml;
 import cz.cuni.mff.odcleanstore.fusiontool.config.xml.PrefixXml;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
+
+import java.util.List;
 
 // CHECKSTYLE:OFF
 
@@ -28,9 +28,6 @@ public class ConfigXml {
     @Element(name = "ConflictResolution", required = false)
     private ConflictResolutionXml conflictResolution;
     
-    @Element(name = "FileOutputs", required = false)
-    private FileOutputsXml fileOutputs;
-
     public List<PrefixXml> getPrefixes() {
         return prefixes;
     }
@@ -41,9 +38,5 @@ public class ConfigXml {
 
     public ConflictResolutionXml getConflictResolution() {
         return conflictResolution;
-    }
-    
-    public FileOutputsXml getFileOutputs() {
-        return fileOutputs;
     }
 }

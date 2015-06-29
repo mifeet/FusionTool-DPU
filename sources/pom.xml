@@ -7,7 +7,7 @@
     <groupId>eu.unifiedviews.plugins</groupId>
     <artifactId>uv-t-fusionTool</artifactId>
     <name>T-FusionTool</name>
-    <version>0.3.0</version>
+    <version>0.3.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>Linked Data fusion tool LD-FusionTool implemented as a UnifiedViews DPU.</description>
 
@@ -18,8 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.java.version>1.7</project.java.version>
 
-        <odcs-cr.version>1.1.5</odcs-cr.version>
-        <odcsft.version>1.1.0</odcsft.version>
+        <odcs-cr.version>1.1.6</odcs-cr.version>
+        <odcsft.version>1.1.2</odcsft.version>
         <sesame.version>2.7.13</sesame.version>
         <uv-devenv.version>1.0.1</uv-devenv.version>
 
@@ -33,13 +33,18 @@
 
     <repositories>
         <repository>
-            <id>cz.cuni.mff.ms.xrg.odcs</id>
-            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>odcs-libs-release</id>
+            <name>libs-release</name>
+            <url>http://odcs.xrg.cz:8080/artifactory/libs-release-local</url>
         </repository>
-
         <repository>
-            <id>cz.cuni.mff.ms.xrg.odcs.thirdparty</id>
-            <url>http://gd.projekty.ms.mff.cuni.cz:9123/nexus/content/repositories/thirdparty/</url>
+            <snapshots/>
+            <id>odcs-libs-snapshot</id>
+            <name>libs-snapshot</name>
+            <url>http://odcs.xrg.cz:8080/artifactory/libs-snapshot-local</url>
         </repository>
 
         <repository>
@@ -48,6 +53,20 @@
             <url>http://maven.eea.sk/artifactory/public/</url>
         </repository>
     </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>odcs.xrg.cz</id>
+            <name>odcs.xrg.cz-releases</name>
+            <url>http://odcs.xrg.cz:8080/artifactory/libs-release-local</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>odcs.xrg.cz</id>
+            <name>odcs.xrg.cz-snapshots</name>
+            <url>http://odcs.xrg.cz:8080/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <!-- UnifiedViews dependencies -->

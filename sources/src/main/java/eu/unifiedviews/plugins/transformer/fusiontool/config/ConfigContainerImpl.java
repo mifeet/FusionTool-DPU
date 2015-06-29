@@ -7,8 +7,6 @@ import org.openrdf.rio.ParserConfig;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,8 +20,6 @@ public class ConfigContainerImpl implements ConfigContainer {
     private ResolutionStrategy defaultResolutionStrategy = new ResolutionStrategyImpl();
     private Map<URI, ResolutionStrategy> propertyResolutionStrategies = new HashMap<>();
 
-    private List<FileOutput> fileOutputs = new LinkedList<>();
-    private Long maxOutputTriples = null;
     private boolean isProfilingOn = false;
     private Long memoryLimit = null;
     private URI requiredClassOfProcessedResources = null;
@@ -154,21 +150,8 @@ public class ConfigContainerImpl implements ConfigContainer {
     }
 
     @Override
-    public List<FileOutput> getFileOutputs() {
-        return fileOutputs;
-    }
-
-    @Override
     public boolean getWriteMetadata() {
         return FTConfigConstants.WRITE_METADATA;
-    }
-
-    /**
-     * Sets result outputs.
-     * @param fileOutputs list of file outputs
-     */
-    public void setFileOutputs(List<FileOutput> fileOutputs) {
-        this.fileOutputs = fileOutputs;
     }
 
     @Override
@@ -219,14 +202,7 @@ public class ConfigContainerImpl implements ConfigContainer {
 
     @Override
     public Long getMaxOutputTriples() {
-        return maxOutputTriples;
-    }
-
-    /**
-     * Sets value for {@link #getMaxOutputTriples()}.
-     */
-    public void setMaxOutputTriples(Long maxOutputTriples) {
-        this.maxOutputTriples = maxOutputTriples;
+        return null;
     }
 
     @Override

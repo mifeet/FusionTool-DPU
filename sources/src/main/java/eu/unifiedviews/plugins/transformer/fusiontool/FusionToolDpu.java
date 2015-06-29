@@ -21,7 +21,6 @@ import eu.unifiedviews.helpers.dpu.config.ConfigurableBase;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainer;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigContainerImpl;
 import eu.unifiedviews.plugins.transformer.fusiontool.config.ConfigReader;
-import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuErrorCodes;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.FusionToolDpuException;
 import eu.unifiedviews.plugins.transformer.fusiontool.exceptions.InvalidInputException;
 import org.simpleframework.xml.core.PersistenceException;
@@ -166,7 +165,7 @@ public class FusionToolDpu extends ConfigurableBase<FusionToolConfig> implements
         if (e.getCause() != null) {
             LOG.error("  " + e.getCause().getMessage());
         }
-        throw new FusionToolDpuException(FusionToolDpuErrorCodes.FUSION_TOOL_EXECUTION_ERROR, e);
+        throw new FusionToolDpuException(e); // TODO
     }
 
     private void printProfilingInformation(FusionToolDpuComponentFactory componentFactory, FusionRunner runner) {
